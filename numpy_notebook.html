@@ -1,0 +1,2820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NumPy → Pandas — An Interactive Course</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EEF2F6;
+    --paper-raised:#FFFFFF;
+    --ink:#1A2333;
+    --ink-soft:#4B5768;
+    --line:#D7DEE8;
+    --blue:#2451E0;
+    --blue-soft:#E4EBFC;
+    --amber:#F2A93B;
+    --amber-soft:#FCEDD3;
+    --green:#1F9D74;
+    --green-soft:#DCF3EA;
+    --red:#D6455D;
+    --code-bg:#0E1526;
+    --code-ink:#DCE6F5;
+    --code-mint:#7DE0C4;
+    --code-amber:#F2C169;
+    --code-pink:#F2789F;
+    --font-display:'Space Grotesk',sans-serif;
+    --font-body:'Inter',sans-serif;
+    --font-mono:'JetBrains Mono',monospace;
+    --radius:14px;
+    --sidebar-w:290px;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    font-family:var(--font-body);
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.65;
+  }
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+  }
+
+  a{color:var(--blue);}
+  ::selection{background:var(--amber-soft);}
+
+  /* ---------- Layout shell ---------- */
+  .shell{display:flex; min-height:100vh;}
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    width:var(--sidebar-w);
+    flex-shrink:0;
+    background:var(--paper-raised);
+    border-right:1px solid var(--line);
+    position:sticky;
+    top:0;
+    height:100vh;
+    overflow-y:auto;
+    padding:22px 16px 30px;
+    z-index:20;
+  }
+  .brand{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    padding:6px 8px 4px;
+    font-family:var(--font-display);
+  }
+  .brand-mark{
+    font-weight:700;
+    font-size:1.15rem;
+    letter-spacing:-0.02em;
+  }
+  .brand-mark span{color:var(--blue);}
+  .brand-tag{
+    font-size:0.68rem;
+    color:var(--ink-soft);
+    font-family:var(--font-mono);
+    letter-spacing:0.02em;
+  }
+
+  .progress-block{
+    margin:16px 8px 20px;
+    padding:14px;
+    background:var(--blue-soft);
+    border-radius:var(--radius);
+  }
+  .progress-label{
+    font-family:var(--font-mono);
+    font-size:0.72rem;
+    color:var(--ink-soft);
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:8px;
+  }
+  #shapeText{color:var(--blue); font-weight:700;}
+  .progress-grid{
+    display:grid;
+    grid-template-columns:repeat(12,1fr);
+    gap:4px;
+  }
+  .progress-cell{
+    aspect-ratio:1;
+    border-radius:4px;
+    background:#fff;
+    border:1px solid var(--line);
+    transition:background 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
+  }
+  .progress-cell.done{
+    background:var(--blue);
+    border-color:var(--blue);
+    transform:scale(1.05);
+  }
+
+  .nav-group{
+    font-family:var(--font-mono);
+    font-size:0.68rem;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--ink-soft);
+    padding:14px 10px 6px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .nav-group::after{content:""; flex:1; height:1px; background:var(--line);}
+  .navlist{list-style:none; margin:0; padding:0;}
+  .navlist li{margin:2px 0;}
+  .navlink{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:9px 10px;
+    border-radius:10px;
+    text-decoration:none;
+    color:var(--ink-soft);
+    font-size:0.88rem;
+    font-weight:500;
+    transition:background 0.15s ease, color 0.15s ease;
+  }
+  .navlink:hover{background:var(--paper); color:var(--ink);}
+  .navlink.active{background:var(--blue-soft); color:var(--blue);}
+  .navlink .idx{
+    font-family:var(--font-mono);
+    font-size:0.72rem;
+    color:var(--ink-soft);
+    min-width:34px;
+  }
+  .navlink.active .idx{color:var(--blue);}
+  .navlink .tick{
+    margin-left:auto;
+    width:16px; height:16px;
+    border-radius:50%;
+    border:1.5px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    font-size:10px;
+    flex-shrink:0;
+  }
+  .navlink.complete .tick{background:var(--green); border-color:var(--green); color:#fff;}
+
+  .search-box{
+    margin:4px 8px 14px;
+    position:relative;
+  }
+  .search-box input{
+    width:100%;
+    padding:9px 12px 9px 30px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:var(--paper);
+    font-family:var(--font-body);
+    font-size:0.85rem;
+    color:var(--ink);
+  }
+  .search-box input:focus{outline:2px solid var(--blue); outline-offset:1px;}
+  .search-box::before{
+    content:"⌕";
+    position:absolute;
+    left:11px; top:7px;
+    color:var(--ink-soft);
+    font-size:1rem;
+  }
+
+  /* ---------- Main content ---------- */
+  .main{
+    flex:1;
+    min-width:0;
+    padding:0;
+  }
+  .topbar{
+    position:sticky; top:0;
+    background:rgba(238,242,246,0.85);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+    padding:12px 40px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    z-index:10;
+  }
+  .topbar-title{
+    font-family:var(--font-mono);
+    font-size:0.78rem;
+    color:var(--ink-soft);
+  }
+  .mode-toggle{
+    border:1px solid var(--line);
+    background:var(--paper-raised);
+    border-radius:20px;
+    padding:6px 14px;
+    font-family:var(--font-mono);
+    font-size:0.75rem;
+    cursor:pointer;
+    color:var(--ink);
+  }
+
+  .content{
+    max-width:820px;
+    margin:0 auto;
+    padding:20px 40px 120px;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    padding:64px 0 40px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:48px;
+  }
+  .hero-eyebrow{
+    font-family:var(--font-mono);
+    font-size:0.8rem;
+    color:var(--blue);
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    margin-bottom:14px;
+  }
+  .hero h1{
+    font-family:var(--font-display);
+    font-size:3rem;
+    line-height:1.05;
+    letter-spacing:-0.02em;
+    margin:0 0 18px;
+  }
+  .hero h1 em{
+    font-style:normal;
+    color:var(--blue);
+  }
+  .hero p.lede{
+    font-size:1.12rem;
+    color:var(--ink-soft);
+    max-width:600px;
+    margin:0 0 28px;
+  }
+  .hero-array{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    font-family:var(--font-mono);
+    flex-wrap:wrap;
+  }
+  .hero-cell{
+    width:46px; height:46px;
+    border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700;
+    font-size:1.05rem;
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    color:var(--ink-soft);
+    transition:transform .5s ease, background .5s ease, color .5s ease;
+  }
+  .hero-cell.lit{background:var(--blue); color:#fff; border-color:var(--blue);}
+  .hero-arrow{color:var(--ink-soft);}
+
+  /* ---------- Section ---------- */
+  .section{
+    scroll-margin-top:90px;
+    margin-bottom:64px;
+    padding-top:8px;
+  }
+  .section-head{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:6px;
+  }
+  .section-badge{
+    font-family:var(--font-mono);
+    font-size:0.78rem;
+    color:var(--blue);
+    background:var(--blue-soft);
+    padding:4px 10px;
+    border-radius:20px;
+    font-weight:600;
+    white-space:nowrap;
+  }
+  .section h2{
+    font-family:var(--font-display);
+    font-size:1.7rem;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+  .section-shape{
+    margin-left:auto;
+    font-family:var(--font-mono);
+    font-size:0.72rem;
+    color:var(--ink-soft);
+  }
+  .section-intro{
+    color:var(--ink-soft);
+    font-size:1.02rem;
+    max-width:660px;
+    margin:14px 0 26px;
+  }
+  .section p{margin:0 0 14px;}
+  .section h3{
+    font-family:var(--font-display);
+    font-size:1.18rem;
+    margin:30px 0 10px;
+  }
+
+  .callout{
+    border-radius:var(--radius);
+    padding:16px 18px;
+    margin:18px 0;
+    font-size:0.95rem;
+    border:1px solid var(--line);
+  }
+  .callout.why{background:var(--amber-soft); border-color:#EFD8A6;}
+  .callout.why::before{content:"Why it matters — "; font-weight:700;}
+  .callout.tip{background:var(--green-soft); border-color:#BFE6D6;}
+  .callout.tip::before{content:"Tip — "; font-weight:700;}
+  .callout.think{background:var(--blue-soft); border-color:#C6D5F7;}
+  .callout.think::before{content:"Think before you run — "; font-weight:700;}
+
+  /* ---------- Code card ---------- */
+  .code-card{
+    background:var(--code-bg);
+    border-radius:var(--radius);
+    overflow:hidden;
+    margin:16px 0 22px;
+    box-shadow:0 8px 24px -12px rgba(14,21,38,0.35);
+  }
+  .code-topbar{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:10px 14px;
+    background:rgba(255,255,255,0.03);
+    border-bottom:1px solid rgba(255,255,255,0.06);
+  }
+  .code-dot{width:9px; height:9px; border-radius:50%;}
+  .code-dot:nth-child(1){background:#F2789F;}
+  .code-dot:nth-child(2){background:#F2C169;}
+  .code-dot:nth-child(3){background:#7DE0C4;}
+  .code-label{
+    margin-left:6px;
+    font-family:var(--font-mono);
+    font-size:0.72rem;
+    color:#8695B2;
+  }
+  .run-btn{
+    margin-left:auto;
+    background:var(--blue);
+    color:#fff;
+    border:none;
+    padding:6px 14px;
+    border-radius:8px;
+    font-family:var(--font-mono);
+    font-size:0.74rem;
+    cursor:pointer;
+    display:flex; align-items:center; gap:6px;
+    transition:background .15s ease;
+  }
+  .run-btn:hover{background:#1A3FC4;}
+  .run-btn::before{content:"▶";}
+  .run-btn.shown::before{content:"↻";}
+  pre.code-body{
+    margin:0;
+    padding:16px 18px;
+    font-family:var(--font-mono);
+    font-size:0.86rem;
+    color:var(--code-ink);
+    overflow-x:auto;
+    line-height:1.6;
+  }
+  .tok-kw{color:var(--code-pink);}
+  .tok-fn{color:var(--code-mint);}
+  .tok-num{color:var(--code-amber);}
+  .tok-str{color:#A8D3FF;}
+  .tok-com{color:#5C6B8A; font-style:italic;}
+
+  .output-panel{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height 0.35s ease;
+    border-top:1px solid rgba(255,255,255,0.06);
+  }
+  .output-panel.open{max-height:400px;}
+  .output-inner{
+    padding:14px 18px;
+    font-family:var(--font-mono);
+    font-size:0.84rem;
+    color:var(--code-mint);
+    white-space:pre-wrap;
+  }
+  .output-tag{
+    font-size:0.68rem;
+    color:#5C6B8A;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    display:block;
+    margin-bottom:6px;
+  }
+
+  /* ---------- Array visualizer ---------- */
+  .viz{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:20px;
+    margin:16px 0 22px;
+  }
+  .viz-title{
+    font-family:var(--font-mono);
+    font-size:0.75rem;
+    color:var(--ink-soft);
+    margin-bottom:14px;
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .viz-row{display:flex; gap:8px; flex-wrap:wrap;}
+  .viz-2d{display:flex; flex-direction:column; gap:8px;}
+  .viz-cellwrap{display:flex; flex-direction:column; align-items:center; gap:4px;}
+  .viz-cell{
+    width:48px; height:48px;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:10px;
+    background:var(--paper);
+    border:1.5px solid var(--line);
+    font-family:var(--font-mono);
+    font-weight:700;
+    font-size:0.95rem;
+    color:var(--ink-soft);
+    transition:all 0.25s ease;
+  }
+  .viz-idx{
+    font-family:var(--font-mono);
+    font-size:0.62rem;
+    color:#A6AFBC;
+  }
+  .viz-cell.hi-a{background:var(--blue); border-color:var(--blue); color:#fff; transform:translateY(-3px);}
+  .viz-cell.hi-b{background:var(--amber); border-color:var(--amber); color:#fff;}
+  .viz-cell.hi-dim{opacity:0.35;}
+  .viz-controls{
+    margin-top:16px;
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .chip{
+    border:1px solid var(--line);
+    background:var(--paper);
+    padding:7px 13px;
+    border-radius:20px;
+    font-family:var(--font-mono);
+    font-size:0.78rem;
+    cursor:pointer;
+    color:var(--ink);
+    transition:all .15s ease;
+  }
+  .chip:hover{border-color:var(--blue); color:var(--blue);}
+  .chip.active{background:var(--blue); border-color:var(--blue); color:#fff;}
+  .viz-note{
+    margin-top:12px;
+    font-size:0.85rem;
+    color:var(--ink-soft);
+    font-family:var(--font-mono);
+    min-height:20px;
+  }
+  input[type=range]{accent-color:var(--blue); width:100%;}
+
+  /* ---------- Quiz ---------- */
+  .quiz{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:20px 22px;
+    margin:20px 0;
+  }
+  .quiz-tag{
+    font-family:var(--font-mono);
+    font-size:0.7rem;
+    color:var(--blue);
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    margin-bottom:8px;
+    display:block;
+  }
+  .quiz-q{font-weight:600; margin-bottom:14px;}
+  .quiz-opts{display:flex; flex-direction:column; gap:8px;}
+  .quiz-opt{
+    text-align:left;
+    padding:11px 14px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:var(--paper);
+    cursor:pointer;
+    font-family:var(--font-body);
+    font-size:0.92rem;
+    color:var(--ink);
+    transition:all .15s ease;
+  }
+  .quiz-opt:hover{border-color:var(--blue);}
+  .quiz-opt.correct{background:var(--green-soft); border-color:var(--green); font-weight:600;}
+  .quiz-opt.wrong{background:#FBE3E7; border-color:var(--red);}
+  .quiz-feedback{
+    margin-top:12px;
+    font-size:0.88rem;
+    padding:10px 12px;
+    border-radius:8px;
+    display:none;
+  }
+  .quiz-feedback.show{display:block;}
+  .quiz-feedback.ok{background:var(--green-soft); color:#0F6B4E;}
+  .quiz-feedback.no{background:#FBE3E7; color:#8A2C3B;}
+
+  /* ---------- Challenge ---------- */
+  .challenge{
+    border:1.5px dashed var(--blue);
+    border-radius:var(--radius);
+    padding:18px 20px;
+    margin:20px 0;
+    background:var(--blue-soft);
+  }
+  .challenge-tag{
+    font-family:var(--font-mono);
+    font-size:0.7rem;
+    color:var(--blue);
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    margin-bottom:8px;
+    display:block;
+  }
+  .challenge summary{
+    cursor:pointer;
+    font-family:var(--font-mono);
+    font-size:0.82rem;
+    color:var(--blue);
+    margin-top:10px;
+    font-weight:600;
+  }
+  .challenge .reveal{
+    margin-top:10px;
+    padding-top:10px;
+    border-top:1px solid #C6D5F7;
+  }
+
+  /* ---------- Complete button ---------- */
+  .complete-row{
+    display:flex;
+    justify-content:flex-end;
+    margin-top:14px;
+  }
+  .complete-btn{
+    border:1px solid var(--line);
+    background:var(--paper-raised);
+    padding:9px 16px;
+    border-radius:10px;
+    font-family:var(--font-mono);
+    font-size:0.78rem;
+    cursor:pointer;
+    display:flex; align-items:center; gap:8px;
+    color:var(--ink);
+    transition:all .15s ease;
+  }
+  .complete-btn:hover{border-color:var(--green);}
+  .complete-btn .box{
+    width:15px; height:15px;
+    border-radius:4px;
+    border:1.5px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    font-size:10px;
+  }
+  .complete-btn.done{color:var(--green); border-color:var(--green); background:var(--green-soft);}
+  .complete-btn.done .box{background:var(--green); border-color:var(--green); color:#fff;}
+
+  /* ---------- DataFrame table visualizer ---------- */
+  .df-viz{
+    overflow-x:auto;
+    border-radius:10px;
+    border:1px solid var(--line);
+  }
+  table.df-table{
+    border-collapse:collapse;
+    width:100%;
+    font-family:var(--font-mono);
+    font-size:0.82rem;
+  }
+  table.df-table th{
+    background:var(--ink);
+    color:#fff;
+    padding:9px 14px;
+    text-align:left;
+    font-weight:500;
+    white-space:nowrap;
+  }
+  table.df-table td{
+    padding:9px 14px;
+    border-top:1px solid var(--line);
+    background:var(--paper-raised);
+    color:var(--ink);
+    white-space:nowrap;
+  }
+  table.df-table td.idxcell, table.df-table th.idxcell{
+    color:var(--ink-soft);
+    background:var(--paper);
+    font-weight:600;
+  }
+  table.df-table tr.hi-row td{background:var(--blue-soft);}
+  table.df-table td.hi-cell{background:var(--blue); color:#fff; font-weight:700;}
+  table.df-table td.hi-col{background:var(--amber-soft);}
+  table.df-table td.dim{opacity:0.32;}
+  table.df-table tr.dim-row td{opacity:0.32;}
+
+  /* ---------- Comparison table ---------- */
+  .cmp-table{
+    width:100%;
+    border-collapse:collapse;
+    margin:16px 0 24px;
+    font-size:0.9rem;
+    border-radius:var(--radius);
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .cmp-table th{
+    background:var(--ink);
+    color:#fff;
+    text-align:left;
+    padding:10px 14px;
+    font-family:var(--font-mono);
+    font-weight:500;
+    font-size:0.78rem;
+  }
+  .cmp-table td{
+    padding:10px 14px;
+    border-top:1px solid var(--line);
+    background:var(--paper-raised);
+  }
+  .cmp-table tr td:first-child{font-weight:600; color:var(--ink-soft); width:32%;}
+
+  /* ---------- Footer / summary ---------- */
+  .summary-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+    gap:10px;
+    margin:20px 0;
+  }
+  .summary-item{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:12px 14px;
+    font-family:var(--font-mono);
+    font-size:0.82rem;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .summary-item .n{color:var(--blue); font-weight:700;}
+
+  footer.site-end{
+    text-align:center;
+    padding:50px 20px 70px;
+    color:var(--ink-soft);
+    font-family:var(--font-mono);
+    font-size:0.82rem;
+  }
+
+  /* ---------- Dark mode ---------- */
+  body.dark{
+    --paper:#121722;
+    --paper-raised:#1A2130;
+    --ink:#E8EDF6;
+    --ink-soft:#93A0B8;
+    --line:#2B3448;
+    --blue-soft:#1D2A4A;
+    --amber-soft:#3A2E19;
+    --green-soft:#173229;
+  }
+  body.dark .hero-cell{color:var(--ink-soft);}
+  body.dark .cmp-table td{background:var(--paper-raised);}
+
+  /* ---------- Mobile nav ---------- */
+  .menu-btn{display:none;}
+  @media (max-width:920px){
+    .sidebar{
+      position:fixed;
+      left:0; top:0;
+      transform:translateX(-105%);
+      transition:transform 0.25s ease;
+      box-shadow:0 0 40px rgba(0,0,0,0.2);
+    }
+    .sidebar.open{transform:translateX(0);}
+    .menu-btn{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      border:1px solid var(--line);
+      background:var(--paper-raised);
+      padding:7px 12px;
+      border-radius:8px;
+      font-family:var(--font-mono);
+      font-size:0.78rem;
+      cursor:pointer;
+    }
+    .content{padding:20px 20px 100px;}
+    .topbar{padding:12px 20px;}
+    .hero h1{font-size:2.1rem;}
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">num<span>py</span>[]</div>
+    </div>
+    <div class="brand-tag">numpy → pandas · an interactive course</div>
+
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Search topics…" oninput="filterNav()">
+    </div>
+
+    <div class="progress-block">
+      <div class="progress-label"><span>your progress</span><span id="shapeText">(0,12)</span></div>
+      <div class="progress-grid" id="progressGrid"></div>
+    </div>
+
+    <ul class="navlist" id="navlist">
+      <div class="nav-group">NumPy</div>
+      <li><a class="navlink" data-key="welcome intro why numpy list" href="#welcome"><span class="idx">[00]</span> Welcome<span class="tick"></span></a></li>
+      <li><a class="navlink" data-key="creating arrays zeros ones full arange linspace eye random rand randint randn" href="#s1"><span class="idx">[01]</span> Creating Arrays<span class="tick"></span></a></li>
+      <li><a class="navlink" data-key="attributes shape ndim size dtype" href="#s2"><span class="idx">[02]</span> Array Attributes<span class="tick"></span></a></li>
+      <li><a class="navlink" data-key="indexing 1d 2d" href="#s3"><span class="idx">[03]</span> Indexing<span class="tick"></span></a></li>
+      <li><a class="navlink" data-key="slicing boolean indexing" href="#s4"><span class="idx">[04]</span> Slicing &amp; Boolean Masks<span class="tick"></span></a></li>
+      <li><a class="navlink" data-key="fancy indexing where conditional selection" href="#s5"><span class="idx">[05]</span> Fancy &amp; Conditional Selection<span class="tick"></span></a></li>
+      <li><a class="navlink" data-key="reshape flatten" href="#s6"><span class="idx">[06]</span> Reshaping &amp; Flattening<span class="tick"></span></a></li>
+      <li><a class="navlink" data-key="sort argsort" href="#s7"><span class="idx">[07]</span> Sorting<span class="tick"></span></a></li>
+      <li><a class="navlink" data-key="concatenate vstack hstack stacking" href="#s8"><span class="idx">[08]</span> Joining Arrays<span class="tick"></span></a></li>
+      <li><a class="navlink" data-key="operations broadcasting elementwise" href="#s9"><span class="idx">[09]</span> Operations &amp; Broadcasting<span class="tick"></span></a></li>
+      <li><a class="navlink" data-key="aggregate statistics sum mean std var axis" href="#s10"><span class="idx">[10]</span> Aggregate Functions<span class="tick"></span></a></li>
+      <li><a class="navlink" data-key="summary practice challenges" href="#s11"><span class="idx">[11]</span> Summary &amp; Practice<span class="tick"></span></a></li>
+
+      <div class="nav-group">Pandas</div>
+      <li><a class="navlink" data-key="pandas introduction series dataframe setup" href="#p1"><span class="idx">[12]</span> Intro to Pandas<span class="tick"></span></a></li>
+      <li><a class="navlink" data-key="dataframe basics head tail info shape loc iloc index columns rename set_index" href="#p2"><span class="idx">[13]</span> DataFrame Basics<span class="tick"></span></a></li>
+      <li><a class="navlink" data-key="data cleaning missing values isna dropna fillna astype replace drop duplicates" href="#p3"><span class="idx">[14]</span> Data Cleaning<span class="tick"></span></a></li>
+      <li><a class="navlink" data-key="selection filtering boolean query str" href="#p4"><span class="idx">[15]</span> Selection &amp; Filtering<span class="tick"></span></a></li>
+      <li><a class="navlink" data-key="sorting statistics sort_values describe value_counts corr cov" href="#p5"><span class="idx">[16]</span> Sorting &amp; Statistics<span class="tick"></span></a></li>
+      <li><a class="navlink" data-key="groupby aggregations split apply combine agg pivot_table crosstab" href="#p6"><span class="idx">[17]</span> GroupBy &amp; Aggregation<span class="tick"></span></a></li>
+      <li><a class="navlink" data-key="merge join concat combining dataframes" href="#p7"><span class="idx">[18]</span> Merging &amp; Joining<span class="tick"></span></a></li>
+      <li><a class="navlink" data-key="time series datetime resample" href="#p8"><span class="idx">[19]</span> Time Series<span class="tick"></span></a></li>
+      <li><a class="navlink" data-key="apply map advanced performance vectorization" href="#p9"><span class="idx">[20]</span> Apply, Map &amp; Performance<span class="tick"></span></a></li>
+      <li><a class="navlink" data-key="pandas summary practice challenges capstone" href="#p10"><span class="idx">[21]</span> Course Summary<span class="tick"></span></a></li>
+    </ul>
+  </aside>
+
+  <!-- ================= MAIN ================= -->
+  <div class="main">
+    <div class="topbar">
+      <button class="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">☰ Topics</button>
+      <div class="topbar-title" id="topbarTitle">numpy · from zero</div>
+      <button class="mode-toggle" onclick="toggleDark()" id="darkBtn">◐ Dark mode</button>
+    </div>
+
+    <div class="content">
+
+      <!-- ============ HERO ============ -->
+      <section class="hero" id="welcome">
+        <div class="hero-eyebrow">a self-paced course · no prior NumPy needed</div>
+        <h1>Arrays are just <em>organized</em> numbers.<br>Let's get organized.</h1>
+        <p class="lede">NumPy is the library that lets Python handle numbers the way a calculator, a spreadsheet, and a mathematician all would — fast, in bulk, and without writing a single loop. This course walks through every core idea with runnable code, visuals you can poke at, and short checks along the way.</p>
+        <div class="hero-array" id="heroArray"></div>
+      </section>
+
+      <p class="section-intro" style="margin-top:-20px;">
+        Before NumPy, doing math on a list of numbers in Python meant looping over it by hand. Here's the difference in practice:
+      </p>
+
+      <table class="cmp-table">
+        <tr><th>Task</th><th>Plain Python list</th><th>NumPy array</th></tr>
+        <tr><td>Multiply every item by 5</td><td><code>[x*5 for x in a]</code></td><td><code>arr * 5</code></td></tr>
+        <tr><td>Add two collections together</td><td>loop + <code>zip()</code></td><td><code>a + b</code></td></tr>
+        <tr><td>Speed on large data</td><td>slow — pure Python loop</td><td>fast — runs in optimized C code</td></tr>
+        <tr><td>Memory usage</td><td>higher — stores rich Python objects</td><td>lower — stores fixed-type raw numbers</td></tr>
+        <tr><td>Shape awareness</td><td>none — a list of lists is just nested lists</td><td>native — arrays know their own dimensions</td></tr>
+      </table>
+
+      <div class="callout why">
+        This is the entire reason NumPy exists: once your data is a NumPy array, you describe <em>what</em> you want done to it, and NumPy figures out the fastest way to actually do it — no manual loops required.
+      </div>
+
+      <div class="complete-row"><button class="complete-btn" data-section="welcome" onclick="toggleComplete(this)"><span class="box"></span> Mark as understood</button></div>
+
+      <!-- ============ SECTION 1: CREATING ARRAYS ============ -->
+      <section class="section" id="s1">
+        <div class="section-head">
+          <span class="section-badge">[01]</span>
+          <h2>Creating NumPy Arrays</h2>
+          <span class="section-shape">shape (7 ways,)</span>
+        </div>
+        <p class="section-intro">Every array starts somewhere: converted from a Python list, or generated directly by one of NumPy's built-in factory functions. Let's go through both routes.</p>
+
+        <h3>From a Python list</h3>
+        <p>The simplest way to create an array is to hand <code>np.array()</code> an existing list.</p>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">vector.py</span>
+            <button class="run-btn" onclick="runCode(this,'out1a')">Run</button>
+          </div>
+<pre class="code-body"><span class="tok-kw">import</span> numpy <span class="tok-kw">as</span> np
+
+a = [<span class="tok-num">1</span>, <span class="tok-num">2</span>, <span class="tok-num">3</span>, <span class="tok-num">4</span>, <span class="tok-num">5</span>]
+arr = np.array(a)
+<span class="tok-fn">print</span>(arr)</pre>
+          <div class="output-panel" id="out1a"><div class="output-inner"><span class="output-tag">output</span>[1 2 3 4 5]</div></div>
+        </div>
+
+        <p>A list of lists becomes a 2D array — a <strong>matrix</strong>. NumPy prints it neatly, aligned in rows and columns.</p>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">matrix.py</span>
+            <button class="run-btn" onclick="runCode(this,'out1b')">Run</button>
+          </div>
+<pre class="code-body">a = [[<span class="tok-num">1</span>,<span class="tok-num">2</span>,<span class="tok-num">3</span>],[<span class="tok-num">4</span>,<span class="tok-num">5</span>,<span class="tok-num">6</span>],[<span class="tok-num">7</span>,<span class="tok-num">8</span>,<span class="tok-num">9</span>]]
+arr = np.array(a)
+<span class="tok-fn">print</span>(arr)</pre>
+          <div class="output-panel" id="out1b"><div class="output-inner"><span class="output-tag">output</span>[[1 2 3]
+ [4 5 6]
+ [7 8 9]]</div></div>
+        </div>
+
+        <div class="viz">
+          <div class="viz-title"><span>try it — a list becomes a grid</span></div>
+          <div class="viz-2d" id="listToGridViz"></div>
+          <div class="viz-note">A vector is one row of boxes. A matrix is rows of rows — NumPy just remembers how many of each.</div>
+        </div>
+
+        <h3>Built-in generator functions</h3>
+        <p>Instead of typing every number by hand, NumPy ships functions that build common array shapes instantly.</p>
+
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">generators.py</span>
+            <button class="run-btn" onclick="runCode(this,'out1c')">Run</button>
+          </div>
+<pre class="code-body"><span class="tok-fn">print</span>(np.zeros(<span class="tok-num">4</span>))          <span class="tok-com"># 4 zeros in a row</span>
+<span class="tok-fn">print</span>(np.zeros([<span class="tok-num">3</span>,<span class="tok-num">4</span>]))     <span class="tok-com"># 3 rows, 4 cols of zeros</span>
+<span class="tok-fn">print</span>(np.ones(<span class="tok-num">3</span>))           <span class="tok-com"># 3 ones</span>
+<span class="tok-fn">print</span>(np.full(<span class="tok-num">5</span>, <span class="tok-num">7</span>))       <span class="tok-com"># 5 copies of the value 7</span>
+<span class="tok-fn">print</span>(np.arange(<span class="tok-num">0</span>, <span class="tok-num">10</span>, <span class="tok-num">2</span>)) <span class="tok-com"># start, stop, step</span>
+<span class="tok-fn">print</span>(np.linspace(<span class="tok-num">0</span>, <span class="tok-num">1</span>, <span class="tok-num">5</span>)) <span class="tok-com"># 5 evenly spaced values between 0 and 1</span>
+<span class="tok-fn">print</span>(np.eye(<span class="tok-num">4</span>))           <span class="tok-com"># 4x4 identity matrix</span></pre>
+          <div class="output-panel" id="out1c"><div class="output-inner"><span class="output-tag">output</span>[0. 0. 0. 0.]
+[[0. 0. 0. 0.]
+ [0. 0. 0. 0.]
+ [0. 0. 0. 0.]]
+[1. 1. 1.]
+[7 7 7 7 7]
+[0 2 4 6 8]
+[0.   0.25 0.5  0.75 1.  ]
+[[1. 0. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 0. 1.]]</div></div>
+        </div>
+
+        <div class="viz">
+          <div class="viz-title"><span>try it — arange vs linspace</span><span id="alTitle">arange(0, 10, 2)</span></div>
+          <div class="viz-row" id="alViz"></div>
+          <div class="viz-controls">
+            <button class="chip active" onclick="setAL('arange',this)">arange (step = 2)</button>
+            <button class="chip" onclick="setAL('linspace',this)">linspace (5 points)</button>
+          </div>
+          <div class="viz-note" id="alNote">arange counts by a fixed step — you set how far apart each value is.</div>
+        </div>
+
+        <div class="callout why">Notice the difference: <strong>arange</strong> is defined by a step size, so the count of values depends on the range. <strong>linspace</strong> is defined by how many values you want, and NumPy spaces them evenly to fit.</div>
+
+        <h3>Random arrays</h3>
+        <p>NumPy's <code>random</code> module generates arrays filled with random numbers — useful for simulations, testing, and shuffling data.</p>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">random.py</span>
+            <button class="run-btn" onclick="runCode(this,'out1d')">Run</button>
+          </div>
+<pre class="code-body"><span class="tok-fn">print</span>(np.random.rand(<span class="tok-num">2</span>, <span class="tok-num">3</span>))        <span class="tok-com"># floats between 0 and 1</span>
+<span class="tok-fn">print</span>(np.random.randint(<span class="tok-num">1</span>, <span class="tok-num">10</span>, (<span class="tok-num">3</span>,<span class="tok-num">3</span>))) <span class="tok-com"># integers from 1-9</span>
+<span class="tok-fn">print</span>(np.random.randn(<span class="tok-num">2</span>, <span class="tok-num">4</span>))       <span class="tok-com"># bell-curve distributed values</span></pre>
+          <div class="output-panel" id="out1d"><div class="output-inner"><span class="output-tag">output</span>[[0.5798 0.0417 0.4582]
+ [0.7735 0.2315 0.7342]]
+[[2 9 7]
+ [1 6 1]
+ [3 7 6]]
+[[ 0.0735  0.0055 -1.4746 -0.4586]
+ [-0.4183  0.8634  0.6489 -0.8324]]</div></div>
+        </div>
+
+        <table class="cmp-table">
+          <tr><th>Function</th><th>What it produces</th></tr>
+          <tr><td><code>arange</code></td><td>Step-based sequence, like a stretched-out <code>range()</code></td></tr>
+          <tr><td><code>linspace</code></td><td>A fixed number of evenly spaced values</td></tr>
+          <tr><td><code>eye</code></td><td>An identity matrix (1s on the diagonal)</td></tr>
+          <tr><td><code>rand</code></td><td>Random floats, uniformly between 0 and 1</td></tr>
+          <tr><td><code>randint</code></td><td>Random integers in a given range</td></tr>
+          <tr><td><code>randn</code></td><td>Random values from a bell-curve (normal) distribution</td></tr>
+        </table>
+
+        <div class="quiz">
+          <span class="quiz-tag">quick check</span>
+          <div class="quiz-q">You need exactly 6 evenly spaced values between 0 and 100. Which function fits best?</div>
+          <div class="quiz-opts">
+            <button class="quiz-opt" onclick="answerQuiz(this,false,'q1')">np.arange(0, 100, 6)</button>
+            <button class="quiz-opt" onclick="answerQuiz(this,true,'q1')">np.linspace(0, 100, 6)</button>
+            <button class="quiz-opt" onclick="answerQuiz(this,false,'q1')">np.random.randint(0, 100, 6)</button>
+          </div>
+          <div class="quiz-feedback" id="fb-q1"></div>
+        </div>
+
+        <div class="challenge">
+          <span class="challenge-tag">practice challenge</span>
+          Create a 4×4 matrix filled entirely with the number 9, without typing 9 sixteen times.
+          <details><summary>Show a solution</summary><div class="reveal"><code>np.full([4,4], 9)</code></div></details>
+        </div>
+
+        <div class="complete-row"><button class="complete-btn" data-section="s1" onclick="toggleComplete(this)"><span class="box"></span> Mark as complete</button></div>
+      </section>
+
+      <!-- ============ SECTION 2: ATTRIBUTES ============ -->
+      <section class="section" id="s2">
+        <div class="section-head">
+          <span class="section-badge">[02]</span>
+          <h2>Array Attributes</h2>
+          <span class="section-shape">shape (4 attrs,)</span>
+        </div>
+        <p class="section-intro">Every array carries metadata about itself — you can ask it directly, no manual counting required.</p>
+
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">attributes.py</span>
+            <button class="run-btn" onclick="runCode(this,'out2a')">Run</button>
+          </div>
+<pre class="code-body">arr = np.array([[<span class="tok-num">1</span>, <span class="tok-num">2</span>, <span class="tok-num">3</span>], [<span class="tok-num">4</span>, <span class="tok-num">5</span>, <span class="tok-num">6</span>]])
+
+<span class="tok-fn">print</span>(<span class="tok-str">"Shape:"</span>, arr.shape)     <span class="tok-com"># (rows, cols)</span>
+<span class="tok-fn">print</span>(<span class="tok-str">"Dimensions:"</span>, arr.ndim) <span class="tok-com"># how many axes</span>
+<span class="tok-fn">print</span>(<span class="tok-str">"Size:"</span>, arr.size)      <span class="tok-com"># total element count</span>
+<span class="tok-fn">print</span>(<span class="tok-str">"Data type:"</span>, arr.dtype) <span class="tok-com"># what kind of number</span></pre>
+          <div class="output-panel" id="out2a"><div class="output-inner"><span class="output-tag">output</span>Shape: (2, 3)
+Dimensions: 2
+Size: 6
+Data type: int64</div></div>
+        </div>
+
+        <div class="viz">
+          <div class="viz-title"><span>try it — click cells to see how attributes are counted</span></div>
+          <div class="viz-2d" id="attrViz"></div>
+          <div class="viz-note" id="attrNote">shape = (2, 3) → 2 rows, 3 columns · ndim = 2 · size = 6</div>
+        </div>
+
+        <table class="cmp-table">
+          <tr><th>Attribute</th><th>Answers the question…</th></tr>
+          <tr><td><code>.shape</code></td><td>How many rows and columns (as a tuple)?</td></tr>
+          <tr><td><code>.ndim</code></td><td>How many dimensions/axes does this array have?</td></tr>
+          <tr><td><code>.size</code></td><td>How many elements total?</td></tr>
+          <tr><td><code>.dtype</code></td><td>What type of number is stored (int64, float64, etc.)?</td></tr>
+        </table>
+
+        <div class="callout tip">A 1D array's shape looks like <code>(5,)</code> — note the trailing comma. That comma is Python's way of showing it's a tuple with just one number, not a plain integer.</div>
+
+        <div class="quiz">
+          <span class="quiz-tag">quick check</span>
+          <div class="quiz-q">An array has shape (3, 5). What is its <code>.size</code>?</div>
+          <div class="quiz-opts">
+            <button class="quiz-opt" onclick="answerQuiz(this,false,'q2')">8</button>
+            <button class="quiz-opt" onclick="answerQuiz(this,true,'q2')">15</button>
+            <button class="quiz-opt" onclick="answerQuiz(this,false,'q2')">2</button>
+          </div>
+          <div class="quiz-feedback" id="fb-q2"></div>
+        </div>
+
+        <div class="complete-row"><button class="complete-btn" data-section="s2" onclick="toggleComplete(this)"><span class="box"></span> Mark as complete</button></div>
+      </section>
+
+      <!-- ============ SECTION 3: INDEXING ============ -->
+      <section class="section" id="s3">
+        <div class="section-head">
+          <span class="section-badge">[03]</span>
+          <h2>Indexing</h2>
+          <span class="section-shape">1D → 2D</span>
+        </div>
+        <p class="section-intro">Indexing means pulling out a single element by its position. It works just like Python lists, then extends naturally into two dimensions.</p>
+
+        <h3>1D indexing</h3>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">index_1d.py</span>
+            <button class="run-btn" onclick="runCode(this,'out3a')">Run</button>
+          </div>
+<pre class="code-body">arr = np.array([<span class="tok-num">10</span>, <span class="tok-num">20</span>, <span class="tok-num">30</span>, <span class="tok-num">40</span>, <span class="tok-num">50</span>])
+<span class="tok-fn">print</span>(arr[<span class="tok-num">0</span>])    <span class="tok-com"># first element</span>
+<span class="tok-fn">print</span>(arr[-<span class="tok-num">1</span>])   <span class="tok-com"># last element</span></pre>
+          <div class="output-panel" id="out3a"><div class="output-inner"><span class="output-tag">output</span>10
+50</div></div>
+        </div>
+
+        <div class="viz">
+          <div class="viz-title"><span>try it — click an index button</span></div>
+          <div class="viz-row" id="idx1dViz"></div>
+          <div class="viz-controls" id="idx1dBtns"></div>
+          <div class="viz-note" id="idx1dNote">Click a button to see which cell that index points to.</div>
+        </div>
+
+        <h3>2D indexing</h3>
+        <p>For a matrix, <code>arr[0]</code> grabs an entire row. Add a second number, <code>arr[row, col]</code>, to reach a single cell.</p>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">index_2d.py</span>
+            <button class="run-btn" onclick="runCode(this,'out3b')">Run</button>
+          </div>
+<pre class="code-body">arr = np.array([[<span class="tok-num">1</span>,<span class="tok-num">2</span>,<span class="tok-num">3</span>],[<span class="tok-num">4</span>,<span class="tok-num">5</span>,<span class="tok-num">6</span>],[<span class="tok-num">7</span>,<span class="tok-num">8</span>,<span class="tok-num">9</span>]])
+
+<span class="tok-fn">print</span>(arr[<span class="tok-num">0</span>])      <span class="tok-com"># entire row 0 → [1 2 3]</span>
+<span class="tok-fn">print</span>(arr[<span class="tok-num">1</span>, <span class="tok-num">1</span>])   <span class="tok-com"># row 1, col 1 → 5</span></pre>
+          <div class="output-panel" id="out3b"><div class="output-inner"><span class="output-tag">output</span>[1 2 3]
+5</div></div>
+        </div>
+
+        <div class="viz">
+          <div class="viz-title"><span>try it — pick a row and column</span></div>
+          <div class="viz-2d" id="idx2dViz"></div>
+          <div class="viz-controls">
+            <label style="font-family:var(--font-mono);font-size:0.78rem;">row <input type="range" id="rowSlider" min="0" max="2" value="1" style="width:100px;" oninput="updateIdx2d()"></label>
+            <label style="font-family:var(--font-mono);font-size:0.78rem;">col <input type="range" id="colSlider" min="0" max="2" value="1" style="width:100px;" oninput="updateIdx2d()"></label>
+          </div>
+          <div class="viz-note" id="idx2dNote"></div>
+        </div>
+
+        <div class="callout think">Before you run it: what would <code>arr[2]</code> print for the matrix above? And what about <code>arr[2, 0]</code>? Work it out, then check with the visualizer.</div>
+
+        <div class="complete-row"><button class="complete-btn" data-section="s3" onclick="toggleComplete(this)"><span class="box"></span> Mark as complete</button></div>
+      </section>
+
+      <!-- ============ SECTION 4: SLICING ============ -->
+      <section class="section" id="s4">
+        <div class="section-head">
+          <span class="section-badge">[04]</span>
+          <h2>Slicing &amp; Boolean Masks</h2>
+          <span class="section-shape">ranges &amp; filters</span>
+        </div>
+        <p class="section-intro">Slicing pulls out a <em>range</em> of elements instead of just one. Boolean masking pulls out elements that pass a test.</p>
+
+        <h3>Slicing in 1D</h3>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">slice_1d.py</span>
+            <button class="run-btn" onclick="runCode(this,'out4a')">Run</button>
+          </div>
+<pre class="code-body">arr = np.array([<span class="tok-num">0</span>,<span class="tok-num">1</span>,<span class="tok-num">2</span>,<span class="tok-num">3</span>,<span class="tok-num">4</span>,<span class="tok-num">5</span>,<span class="tok-num">6</span>,<span class="tok-num">7</span>,<span class="tok-num">8</span>,<span class="tok-num">9</span>])
+<span class="tok-fn">print</span>(arr[<span class="tok-num">2</span>:<span class="tok-num">8</span>])     <span class="tok-com"># index 2 up to (not including) 8</span>
+<span class="tok-fn">print</span>(arr[::<span class="tok-num">2</span>])     <span class="tok-com"># every 2nd element</span>
+<span class="tok-fn">print</span>(arr[::-<span class="tok-num">1</span>])    <span class="tok-com"># reversed</span></pre>
+          <div class="output-panel" id="out4a"><div class="output-inner"><span class="output-tag">output</span>[2 3 4 5 6 7]
+[0 2 4 6 8]
+[9 8 7 6 5 4 3 2 1 0]</div></div>
+        </div>
+
+        <div class="viz">
+          <div class="viz-title"><span>try it — drag the range</span><span id="sliceLabel">arr[2:8]</span></div>
+          <div class="viz-row" id="sliceViz"></div>
+          <div class="viz-controls">
+            <label style="font-family:var(--font-mono);font-size:0.78rem;">start <input type="range" id="sliceStart" min="0" max="9" value="2" style="width:100px;" oninput="updateSlice()"></label>
+            <label style="font-family:var(--font-mono);font-size:0.78rem;">stop <input type="range" id="sliceStop" min="0" max="10" value="8" style="width:100px;" oninput="updateSlice()"></label>
+          </div>
+          <div class="viz-note">Highlighted cells are what <code>arr[start:stop]</code> returns. The stop index is never included.</div>
+        </div>
+
+        <h3>Slicing in 2D</h3>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">slice_2d.py</span>
+            <button class="run-btn" onclick="runCode(this,'out4b')">Run</button>
+          </div>
+<pre class="code-body">arr = np.array([[<span class="tok-num">1</span>,<span class="tok-num">2</span>,<span class="tok-num">3</span>],[<span class="tok-num">4</span>,<span class="tok-num">5</span>,<span class="tok-num">6</span>],[<span class="tok-num">7</span>,<span class="tok-num">8</span>,<span class="tok-num">9</span>]])
+<span class="tok-fn">print</span>(arr[<span class="tok-num">0</span>:<span class="tok-num">2</span>, <span class="tok-num">1</span>:<span class="tok-num">3</span>])
+<span class="tok-com"># rows 0-1, cols 1-2 → [[2 3],[5 6]]</span></pre>
+          <div class="output-panel" id="out4b"><div class="output-inner"><span class="output-tag">output</span>[[2 3]
+ [5 6]]</div></div>
+        </div>
+
+        <h3>Boolean indexing</h3>
+        <p>Instead of positions, you can filter by a condition. <code>arr &gt; 12</code> produces an array of True/False values — a <strong>mask</strong> — and <code>arr[mask]</code> keeps only the True ones.</p>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">boolean_mask.py</span>
+            <button class="run-btn" onclick="runCode(this,'out4c')">Run</button>
+          </div>
+<pre class="code-body">arr = np.array([<span class="tok-num">5</span>, <span class="tok-num">10</span>, <span class="tok-num">15</span>, <span class="tok-num">20</span>, <span class="tok-num">25</span>])
+<span class="tok-fn">print</span>(arr > <span class="tok-num">12</span>)          <span class="tok-com"># [False False True True True]</span>
+<span class="tok-fn">print</span>(arr[arr > <span class="tok-num">12</span>])    <span class="tok-com"># [15 20 25]</span></pre>
+          <div class="output-panel" id="out4c"><div class="output-inner"><span class="output-tag">output</span>[False False  True  True  True]
+[15 20 25]</div></div>
+        </div>
+
+        <div class="viz">
+          <div class="viz-title"><span>try it — move the threshold</span><span id="maskLabel">arr &gt; 12</span></div>
+          <div class="viz-row" id="maskViz"></div>
+          <div class="viz-controls">
+            <label style="font-family:var(--font-mono);font-size:0.78rem;">threshold <input type="range" id="maskThresh" min="0" max="30" value="12" style="width:140px;" oninput="updateMask()"></label>
+          </div>
+          <div class="viz-note">Blue cells are the values that pass the condition and would be kept by <code>arr[arr &gt; threshold]</code>.</div>
+        </div>
+
+        <div class="quiz">
+          <span class="quiz-tag">quick check</span>
+          <div class="quiz-q">For <code>arr = np.array([0,1,2,3,4,5,6,7,8,9])</code>, what does <code>arr[3:]</code> return?</div>
+          <div class="quiz-opts">
+            <button class="quiz-opt" onclick="answerQuiz(this,false,'q3')">[0 1 2]</button>
+            <button class="quiz-opt" onclick="answerQuiz(this,true,'q3')">[3 4 5 6 7 8 9]</button>
+            <button class="quiz-opt" onclick="answerQuiz(this,false,'q3')">[3]</button>
+          </div>
+          <div class="quiz-feedback" id="fb-q3"></div>
+        </div>
+
+        <div class="challenge">
+          <span class="challenge-tag">practice challenge</span>
+          Given <code>arr = np.array([3, 17, 8, 22, 5, 19])</code>, write one line that keeps only the even numbers.
+          <details><summary>Show a solution</summary><div class="reveal"><code>arr[arr % 2 == 0]</code></div></details>
+        </div>
+
+        <div class="complete-row"><button class="complete-btn" data-section="s4" onclick="toggleComplete(this)"><span class="box"></span> Mark as complete</button></div>
+      </section>
+
+      <!-- ============ SECTION 5: FANCY & CONDITIONAL ============ -->
+      <section class="section" id="s5">
+        <div class="section-head">
+          <span class="section-badge">[05]</span>
+          <h2>Fancy Indexing &amp; Conditional Selection</h2>
+          <span class="section-shape">pick &amp; replace</span>
+        </div>
+        <p class="section-intro">Beyond ranges and masks, NumPy lets you pick an arbitrary set of positions at once, or swap values in and out based on a condition.</p>
+
+        <h3>Fancy indexing</h3>
+        <p>Pass a list of positions instead of a single index, and NumPy returns all of them together.</p>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">fancy.py</span>
+            <button class="run-btn" onclick="runCode(this,'out5a')">Run</button>
+          </div>
+<pre class="code-body">arr = np.array([<span class="tok-num">10</span>, <span class="tok-num">20</span>, <span class="tok-num">30</span>, <span class="tok-num">40</span>, <span class="tok-num">50</span>, <span class="tok-num">60</span>])
+<span class="tok-fn">print</span>(arr[[<span class="tok-num">0</span>, <span class="tok-num">2</span>, <span class="tok-num">4</span>]])   <span class="tok-com"># positions 0, 2, 4 → [10 30 50]</span>
+
+matrix = np.arange(<span class="tok-num">1</span>, <span class="tok-num">13</span>).reshape(<span class="tok-num">3</span>, <span class="tok-num">4</span>)
+<span class="tok-fn">print</span>(matrix[[<span class="tok-num">0</span>,<span class="tok-num">1</span>],[<span class="tok-num">1</span>,<span class="tok-num">2</span>]]) <span class="tok-com"># (row0,col1) and (row1,col2)</span></pre>
+          <div class="output-panel" id="out5a"><div class="output-inner"><span class="output-tag">output</span>[10 30 50]
+[2 7]</div></div>
+        </div>
+
+        <div class="viz">
+          <div class="viz-title"><span>try it — toggle which positions to pick</span></div>
+          <div class="viz-row" id="fancyViz"></div>
+          <div class="viz-note" id="fancyNote">arr[[]] → []</div>
+        </div>
+
+        <h3>Conditional selection with np.where</h3>
+        <p><code>np.where(condition)</code> returns the <em>indices</em> where a condition is true. Give it three arguments — <code>np.where(condition, if_true, if_false)</code> — and it builds a brand-new array instead.</p>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">where.py</span>
+            <button class="run-btn" onclick="runCode(this,'out5b')">Run</button>
+          </div>
+<pre class="code-body">arr = np.array([<span class="tok-num">5</span>, <span class="tok-num">12</span>, <span class="tok-num">18</span>, <span class="tok-num">7</span>, <span class="tok-num">30</span>])
+
+<span class="tok-fn">print</span>(np.where(arr > <span class="tok-num">10</span>))          <span class="tok-com"># indices: (array([1, 2, 4]),)</span>
+<span class="tok-fn">print</span>(np.where(arr > <span class="tok-num">10</span>, arr, <span class="tok-num">0</span>))  <span class="tok-com"># keep if >10, else 0</span></pre>
+          <div class="output-panel" id="out5b"><div class="output-inner"><span class="output-tag">output</span>(array([1, 2, 4]),)
+[ 0 12 18  0 30]</div></div>
+        </div>
+
+        <div class="callout tip">Boolean masking (<code>arr[arr &gt; 10]</code>) throws away everything that fails the test. <code>np.where(arr &gt; 10, arr, 0)</code> keeps the original shape and just replaces the failing values — very useful when shape has to stay consistent.</div>
+
+        <div class="quiz">
+          <span class="quiz-tag">quick check</span>
+          <div class="quiz-q">What does <code>np.where(arr &gt; 10)</code> return, exactly?</div>
+          <div class="quiz-opts">
+            <button class="quiz-opt" onclick="answerQuiz(this,false,'q4')">The values greater than 10</button>
+            <button class="quiz-opt" onclick="answerQuiz(this,true,'q4')">The indices where the condition is true</button>
+            <button class="quiz-opt" onclick="answerQuiz(this,false,'q4')">True or False for every element</button>
+          </div>
+          <div class="quiz-feedback" id="fb-q4"></div>
+        </div>
+
+        <div class="complete-row"><button class="complete-btn" data-section="s5" onclick="toggleComplete(this)"><span class="box"></span> Mark as complete</button></div>
+      </section>
+
+      <!-- ============ SECTION 6: RESHAPE & FLATTEN ============ -->
+      <section class="section" id="s6">
+        <div class="section-head">
+          <span class="section-badge">[06]</span>
+          <h2>Reshaping &amp; Flattening</h2>
+          <span class="section-shape">same data, new shape</span>
+        </div>
+        <p class="section-intro">Reshaping doesn't change any values — it only changes how they're arranged into rows and columns. The total element count must stay the same.</p>
+
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">reshape.py</span>
+            <button class="run-btn" onclick="runCode(this,'out6a')">Run</button>
+          </div>
+<pre class="code-body">arr = np.arange(<span class="tok-num">12</span>)             <span class="tok-com"># [0, 1, 2, ... 11]</span>
+reshaped = arr.reshape(<span class="tok-num">3</span>, <span class="tok-num">4</span>)
+<span class="tok-fn">print</span>(reshaped)</pre>
+          <div class="output-panel" id="out6a"><div class="output-inner"><span class="output-tag">output</span>[[ 0  1  2  3]
+ [ 4  5  6  7]
+ [ 8  9 10 11]]</div></div>
+        </div>
+
+        <div class="viz">
+          <div class="viz-title"><span>try it — pick a shape for 12 elements</span></div>
+          <div class="viz-2d" id="reshapeViz"></div>
+          <div class="viz-controls">
+            <button class="chip active" onclick="setReshape(1,12,this)">1 × 12</button>
+            <button class="chip" onclick="setReshape(2,6,this)">2 × 6</button>
+            <button class="chip" onclick="setReshape(3,4,this)">3 × 4</button>
+            <button class="chip" onclick="setReshape(4,3,this)">4 × 3</button>
+            <button class="chip" onclick="setReshape(6,2,this)">6 × 2</button>
+          </div>
+          <div class="viz-note">Same 12 numbers, in the same order — only the grid changes. rows × cols must always equal 12.</div>
+        </div>
+
+        <div class="callout why">This matters constantly in real work: a batch of images, a row of sensor readings, or a flat list from a file often needs to become a grid (or vice versa) before further processing — without touching a single value.</div>
+
+        <h3>Flattening</h3>
+        <p><code>.flatten()</code> is the reverse move: it takes any array and lays it out as a single 1D row.</p>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">flatten.py</span>
+            <button class="run-btn" onclick="runCode(this,'out6b')">Run</button>
+          </div>
+<pre class="code-body">arr = np.array([[<span class="tok-num">1</span>,<span class="tok-num">2</span>,<span class="tok-num">3</span>],[<span class="tok-num">4</span>,<span class="tok-num">5</span>,<span class="tok-num">6</span>]])
+<span class="tok-fn">print</span>(arr.flatten())   <span class="tok-com"># [1 2 3 4 5 6]</span></pre>
+          <div class="output-panel" id="out6b"><div class="output-inner"><span class="output-tag">output</span>[1 2 3 4 5 6]</div></div>
+        </div>
+
+        <div class="quiz">
+          <span class="quiz-tag">quick check</span>
+          <div class="quiz-q">Can you reshape an array of 10 elements into shape (3, 4)?</div>
+          <div class="quiz-opts">
+            <button class="quiz-opt" onclick="answerQuiz(this,false,'q5')">Yes, NumPy fills in the gaps</button>
+            <button class="quiz-opt" onclick="answerQuiz(this,true,'q5')">No — 3×4 = 12, which doesn't match 10 elements</button>
+          </div>
+          <div class="quiz-feedback" id="fb-q5"></div>
+        </div>
+
+        <div class="complete-row"><button class="complete-btn" data-section="s6" onclick="toggleComplete(this)"><span class="box"></span> Mark as complete</button></div>
+      </section>
+
+      <!-- ============ SECTION 7: SORTING ============ -->
+      <section class="section" id="s7">
+        <div class="section-head">
+          <span class="section-badge">[07]</span>
+          <h2>Sorting</h2>
+          <span class="section-shape">order &amp; origin</span>
+        </div>
+        <p class="section-intro"><code>np.sort()</code> returns values in order. <code>np.argsort()</code> tells you the <em>indices</em> that would put them in order — useful when you need to sort one array by the values of another.</p>
+
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">sort.py</span>
+            <button class="run-btn" onclick="runCode(this,'out7a')">Run</button>
+          </div>
+<pre class="code-body">arr = np.array([<span class="tok-num">42</span>, <span class="tok-num">5</span>, <span class="tok-num">18</span>, <span class="tok-num">23</span>])
+<span class="tok-fn">print</span>(<span class="tok-str">"Sorted:"</span>, np.sort(arr))
+
+idx = np.argsort(arr)
+<span class="tok-fn">print</span>(<span class="tok-str">"Indices:"</span>, idx)
+<span class="tok-fn">print</span>(<span class="tok-str">"Use indices:"</span>, arr[idx])</pre>
+          <div class="output-panel" id="out7a"><div class="output-inner"><span class="output-tag">output</span>Sorted: [ 5 18 23 42]
+Indices: [1 2 3 0]
+Use indices: [ 5 18 23 42]</div></div>
+        </div>
+
+        <div class="viz">
+          <div class="viz-title"><span>try it — original vs sorted</span></div>
+          <div class="viz-2d" id="sortViz"></div>
+          <div class="viz-note">The number under each cell is where it <em>came from</em> — that's exactly what argsort reports.</div>
+        </div>
+
+        <h3>Sorting a matrix by axis</h3>
+        <p>On a 2D array, choose whether to sort <em>within each row</em> (<code>axis=1</code>) or <em>within each column</em> (<code>axis=0</code>).</p>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">sort_axis.py</span>
+            <button class="run-btn" onclick="runCode(this,'out7b')">Run</button>
+          </div>
+<pre class="code-body">mat = np.array([[<span class="tok-num">3</span>,<span class="tok-num">7</span>,<span class="tok-num">1</span>],[<span class="tok-num">9</span>,<span class="tok-num">4</span>,<span class="tok-num">6</span>]])
+<span class="tok-fn">print</span>(np.sort(mat, axis=<span class="tok-num">1</span>))   <span class="tok-com"># sort each row</span>
+<span class="tok-fn">print</span>(np.sort(mat, axis=<span class="tok-num">0</span>))   <span class="tok-com"># sort each column</span></pre>
+          <div class="output-panel" id="out7b"><div class="output-inner"><span class="output-tag">output</span>[[1 3 7]
+ [4 6 9]]
+[[3 4 1]
+ [9 7 6]]</div></div>
+        </div>
+
+        <div class="complete-row"><button class="complete-btn" data-section="s7" onclick="toggleComplete(this)"><span class="box"></span> Mark as complete</button></div>
+      </section>
+
+      <!-- ============ SECTION 8: JOINING ============ -->
+      <section class="section" id="s8">
+        <div class="section-head">
+          <span class="section-badge">[08]</span>
+          <h2>Joining Arrays</h2>
+          <span class="section-shape">concat · vstack · hstack</span>
+        </div>
+        <p class="section-intro">Splitting data into pieces and recombining it is common — NumPy gives you a few clear ways to glue arrays back together.</p>
+
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">concatenate.py</span>
+            <button class="run-btn" onclick="runCode(this,'out8a')">Run</button>
+          </div>
+<pre class="code-body">a = np.array([<span class="tok-num">1</span>,<span class="tok-num">2</span>,<span class="tok-num">3</span>])
+b = np.array([<span class="tok-num">4</span>,<span class="tok-num">5</span>,<span class="tok-num">6</span>])
+<span class="tok-fn">print</span>(np.concatenate([a, b]))</pre>
+          <div class="output-panel" id="out8a"><div class="output-inner"><span class="output-tag">output</span>[1 2 3 4 5 6]</div></div>
+        </div>
+
+        <p>For 2D arrays, <code>vstack</code> stacks them <strong>vertically</strong> (adds rows) and <code>hstack</code> stacks them <strong>horizontally</strong> (adds columns).</p>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">stacking.py</span>
+            <button class="run-btn" onclick="runCode(this,'out8b')">Run</button>
+          </div>
+<pre class="code-body">A = np.array([[<span class="tok-num">1</span>,<span class="tok-num">2</span>],[<span class="tok-num">3</span>,<span class="tok-num">4</span>]])
+B = np.array([[<span class="tok-num">5</span>,<span class="tok-num">6</span>],[<span class="tok-num">7</span>,<span class="tok-num">8</span>]])
+
+<span class="tok-fn">print</span>(np.vstack((A,B)))   <span class="tok-com"># stacked on top of each other</span>
+<span class="tok-fn">print</span>(np.hstack((A,B)))   <span class="tok-com"># stacked side by side</span></pre>
+          <div class="output-panel" id="out8b"><div class="output-inner"><span class="output-tag">output</span>[[1 2]
+ [3 4]
+ [5 6]
+ [7 8]]
+[[1 2 5 6]
+ [3 4 7 8]]</div></div>
+        </div>
+
+        <div class="viz">
+          <div class="viz-title"><span>try it — vstack vs hstack</span></div>
+          <div class="viz-controls" style="margin-top:0;margin-bottom:14px;">
+            <button class="chip active" onclick="setStack('v',this)">vstack</button>
+            <button class="chip" onclick="setStack('h',this)">hstack</button>
+          </div>
+          <div class="viz-2d" id="stackViz"></div>
+        </div>
+
+        <div class="quiz">
+          <span class="quiz-tag">quick check</span>
+          <div class="quiz-q">You have two 2×2 matrices and want the result to have 4 rows. Which function do you use?</div>
+          <div class="quiz-opts">
+            <button class="quiz-opt" onclick="answerQuiz(this,true,'q6')">np.vstack</button>
+            <button class="quiz-opt" onclick="answerQuiz(this,false,'q6')">np.hstack</button>
+          </div>
+          <div class="quiz-feedback" id="fb-q6"></div>
+        </div>
+
+        <div class="complete-row"><button class="complete-btn" data-section="s8" onclick="toggleComplete(this)"><span class="box"></span> Mark as complete</button></div>
+      </section>
+
+      <!-- ============ SECTION 9: OPERATIONS & BROADCASTING ============ -->
+      <section class="section" id="s9">
+        <div class="section-head">
+          <span class="section-badge">[09]</span>
+          <h2>Operations &amp; Broadcasting</h2>
+          <span class="section-shape">element-wise math</span>
+        </div>
+        <p class="section-intro">Arithmetic on arrays happens <strong>element-wise</strong> — no loops needed. And when shapes don't match exactly, NumPy can often stretch the smaller one to fit, a behavior called <strong>broadcasting</strong>.</p>
+
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">elementwise.py</span>
+            <button class="run-btn" onclick="runCode(this,'out9a')">Run</button>
+          </div>
+<pre class="code-body">a = np.array([<span class="tok-num">10</span>, <span class="tok-num">20</span>, <span class="tok-num">30</span>, <span class="tok-num">40</span>])
+b = np.array([<span class="tok-num">1</span>, <span class="tok-num">2</span>, <span class="tok-num">3</span>, <span class="tok-num">4</span>])
+
+<span class="tok-fn">print</span>(<span class="tok-str">"Addition:"</span>, a + b)
+<span class="tok-fn">print</span>(<span class="tok-str">"Subtraction:"</span>, a - b)
+<span class="tok-fn">print</span>(<span class="tok-str">"Multiplication:"</span>, a * b)
+<span class="tok-fn">print</span>(<span class="tok-str">"Division:"</span>, a / b)</pre>
+          <div class="output-panel" id="out9a"><div class="output-inner"><span class="output-tag">output</span>Addition: [11 22 33 44]
+Subtraction: [ 9 18 27 36]
+Multiplication: [ 10  40  90 160]
+Division: [10. 10. 10. 10.]</div></div>
+        </div>
+
+        <h3>Broadcasting a single number</h3>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">scalar_broadcast.py</span>
+            <button class="run-btn" onclick="runCode(this,'out9b')">Run</button>
+          </div>
+<pre class="code-body">arr = np.array([<span class="tok-num">1</span>,<span class="tok-num">2</span>,<span class="tok-num">3</span>,<span class="tok-num">4</span>])
+<span class="tok-fn">print</span>(arr * <span class="tok-num">5</span>)    <span class="tok-com"># every element × 5</span></pre>
+          <div class="output-panel" id="out9b"><div class="output-inner"><span class="output-tag">output</span>[ 5 10 15 20]</div></div>
+        </div>
+
+        <h3>Broadcasting a row across a matrix</h3>
+        <p>A shorter array can be "stretched" across a matrix's rows, as long as its length matches the number of columns.</p>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">row_broadcast.py</span>
+            <button class="run-btn" onclick="runCode(this,'out9c')">Run</button>
+          </div>
+<pre class="code-body">A = np.array([[<span class="tok-num">1</span>,<span class="tok-num">2</span>,<span class="tok-num">3</span>],
+              [<span class="tok-num">4</span>,<span class="tok-num">5</span>,<span class="tok-num">6</span>]])
+B = np.array([<span class="tok-num">10</span>,<span class="tok-num">20</span>,<span class="tok-num">30</span>])     <span class="tok-com"># shape (3,)</span>
+
+<span class="tok-fn">print</span>(A + B)</pre>
+          <div class="output-panel" id="out9c"><div class="output-inner"><span class="output-tag">output</span>[[11 22 33]
+ [14 25 36]]</div></div>
+        </div>
+
+        <div class="viz">
+          <div class="viz-title"><span>see it — B is reused for every row of A</span></div>
+          <div id="broadcastViz"></div>
+          <div class="viz-note">B has shape (3,) — no rows of its own — so NumPy conceptually copies it once per row of A. This only works if the trailing dimensions match.</div>
+        </div>
+
+        <div class="callout why">Broadcasting is why you almost never write a loop with NumPy. Instead of looping over rows to add the same values to each one, you describe the rule once and let NumPy apply it everywhere.</div>
+
+        <div class="quiz">
+          <span class="quiz-tag">quick check</span>
+          <div class="quiz-q">A has shape (2, 3). Can you broadcast-add an array B with shape (3,)?</div>
+          <div class="quiz-opts">
+            <button class="quiz-opt" onclick="answerQuiz(this,true,'q7')">Yes — 3 matches A's column count</button>
+            <button class="quiz-opt" onclick="answerQuiz(this,false,'q7')">No — shapes must always be identical</button>
+          </div>
+          <div class="quiz-feedback" id="fb-q7"></div>
+        </div>
+
+        <div class="complete-row"><button class="complete-btn" data-section="s9" onclick="toggleComplete(this)"><span class="box"></span> Mark as complete</button></div>
+      </section>
+
+      <!-- ============ SECTION 10: AGGREGATE ============ -->
+      <section class="section" id="s10">
+        <div class="section-head">
+          <span class="section-badge">[10]</span>
+          <h2>Aggregate &amp; Statistical Functions</h2>
+          <span class="section-shape">summarize the data</span>
+        </div>
+        <p class="section-intro">Aggregate functions collapse an array down into a single summary value — or one value per row/column, if you ask for it that way.</p>
+
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">aggregates.py</span>
+            <button class="run-btn" onclick="runCode(this,'out10a')">Run</button>
+          </div>
+<pre class="code-body">arr = np.array([<span class="tok-num">4</span>, <span class="tok-num">8</span>, <span class="tok-num">15</span>, <span class="tok-num">16</span>, <span class="tok-num">23</span>, <span class="tok-num">42</span>])
+
+<span class="tok-fn">print</span>(<span class="tok-str">"Sum:"</span>, np.sum(arr))
+<span class="tok-fn">print</span>(<span class="tok-str">"Mean:"</span>, np.mean(arr))
+<span class="tok-fn">print</span>(<span class="tok-str">"Min:"</span>, np.min(arr))
+<span class="tok-fn">print</span>(<span class="tok-str">"Max:"</span>, np.max(arr))
+<span class="tok-fn">print</span>(<span class="tok-str">"Standard Deviation:"</span>, np.std(arr))
+<span class="tok-fn">print</span>(<span class="tok-str">"Variance:"</span>, np.var(arr))</pre>
+          <div class="output-panel" id="out10a"><div class="output-inner"><span class="output-tag">output</span>Sum: 108
+Mean: 18.0
+Min: 4
+Max: 42
+Standard Deviation: 12.315302134607444
+Variance: 151.66666666666666</div></div>
+        </div>
+
+        <h3>Working along an axis</h3>
+        <p>On a 2D array, pass <code>axis=0</code> to aggregate down each column, or <code>axis=1</code> to aggregate across each row.</p>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">axis.py</span>
+            <button class="run-btn" onclick="runCode(this,'out10b')">Run</button>
+          </div>
+<pre class="code-body">data = np.array([[<span class="tok-num">1</span>, <span class="tok-num">2</span>, <span class="tok-num">3</span>],
+                 [<span class="tok-num">4</span>, <span class="tok-num">5</span>, <span class="tok-num">6</span>],
+                 [<span class="tok-num">7</span>, <span class="tok-num">8</span>, <span class="tok-num">9</span>]])
+
+<span class="tok-fn">print</span>(<span class="tok-str">"Row-wise sum:"</span>, np.sum(data, axis=<span class="tok-num">1</span>))    <span class="tok-com"># across columns</span>
+<span class="tok-fn">print</span>(<span class="tok-str">"Column-wise sum:"</span>, np.sum(data, axis=<span class="tok-num">0</span>)) <span class="tok-com"># across rows</span></pre>
+          <div class="output-panel" id="out10b"><div class="output-inner"><span class="output-tag">output</span>Row-wise sum: [ 6 15 24]
+Column-wise sum: [12 15 18]</div></div>
+        </div>
+
+        <div class="viz">
+          <div class="viz-title"><span>try it — pick a direction</span></div>
+          <div class="viz-2d" id="axisViz"></div>
+          <div class="viz-controls">
+            <button class="chip active" onclick="setAxis(1,this)">axis=1 (row-wise)</button>
+            <button class="chip" onclick="setAxis(0,this)">axis=0 (column-wise)</button>
+          </div>
+          <div class="viz-note" id="axisNote"></div>
+        </div>
+
+        <div class="callout tip">A memory trick: <code>axis=0</code> moves <em>down</em> the rows (collapsing them into one value per column). <code>axis=1</code> moves <em>across</em> the columns (collapsing them into one value per row).</div>
+
+        <div class="quiz">
+          <span class="quiz-tag">quick check</span>
+          <div class="quiz-q">To get one average per row of a 2D array, which axis do you use?</div>
+          <div class="quiz-opts">
+            <button class="quiz-opt" onclick="answerQuiz(this,false,'q8')">axis=0</button>
+            <button class="quiz-opt" onclick="answerQuiz(this,true,'q8')">axis=1</button>
+          </div>
+          <div class="quiz-feedback" id="fb-q8"></div>
+        </div>
+
+        <div class="complete-row"><button class="complete-btn" data-section="s10" onclick="toggleComplete(this)"><span class="box"></span> Mark as complete</button></div>
+      </section>
+
+      <!-- ============ SECTION 11: SUMMARY ============ -->
+      <section class="section" id="s11">
+        <div class="section-head">
+          <span class="section-badge">[11]</span>
+          <h2>Summary &amp; Practice Challenges</h2>
+          <span class="section-shape">the whole course, at a glance</span>
+        </div>
+        <p class="section-intro">Here's everything you've covered, compressed into one reference view.</p>
+
+        <div class="summary-grid">
+          <div class="summary-item"><span class="n">01</span> Creating arrays</div>
+          <div class="summary-item"><span class="n">02</span> shape · ndim · size · dtype</div>
+          <div class="summary-item"><span class="n">03</span> Indexing (1D &amp; 2D)</div>
+          <div class="summary-item"><span class="n">04</span> Slicing &amp; boolean masks</div>
+          <div class="summary-item"><span class="n">05</span> Fancy indexing · np.where</div>
+          <div class="summary-item"><span class="n">06</span> reshape() · flatten()</div>
+          <div class="summary-item"><span class="n">07</span> sort() · argsort()</div>
+          <div class="summary-item"><span class="n">08</span> concatenate · vstack · hstack</div>
+          <div class="summary-item"><span class="n">09</span> Element-wise ops · broadcasting</div>
+          <div class="summary-item"><span class="n">10</span> sum · mean · std · var · axis</div>
+        </div>
+
+        <h3>Final practice challenges</h3>
+
+        <div class="challenge">
+          <span class="challenge-tag">challenge 1</span>
+          Create a 5×5 identity matrix, then replace every 0 in it with -1 using <code>np.where</code>.
+          <details><summary>Show a solution</summary><div class="reveal"><code>m = np.eye(5)<br>np.where(m == 0, -1, m)</code></div></details>
+        </div>
+
+        <div class="challenge">
+          <span class="challenge-tag">challenge 2</span>
+          Build a 3×4 array using <code>np.arange</code> and <code>.reshape()</code>, then find the mean of each column.
+          <details><summary>Show a solution</summary><div class="reveal"><code>a = np.arange(12).reshape(3,4)<br>np.mean(a, axis=0)</code></div></details>
+        </div>
+
+        <div class="challenge">
+          <span class="challenge-tag">challenge 3</span>
+          Given two 1D arrays of the same length, stack them into a 2×N matrix, then sort each row independently.
+          <details><summary>Show a solution</summary><div class="reveal"><code>m = np.vstack((a, b))<br>np.sort(m, axis=1)</code></div></details>
+        </div>
+
+        <div class="callout why">That's the core of NumPy. Every other array operation you'll encounter — linear algebra, image processing, machine learning pipelines — builds directly on these ideas: shape, indexing, broadcasting, and aggregation.</div>
+
+        <div class="complete-row"><button class="complete-btn" data-section="s11" onclick="toggleComplete(this)"><span class="box"></span> Mark as complete</button></div>
+      </section>
+
+      <!-- ============ PANDAS DIVIDER ============ -->
+      <div class="hero" id="pandas-divider" style="padding-top:40px;">
+        <div class="hero-eyebrow">part two · tabular data</div>
+        <h1 style="font-size:2.3rem;">NumPy gave you the grid.<br><em>Pandas</em> gives it labels.</h1>
+        <p class="lede">A DataFrame is a NumPy array wearing row and column names. Everything you already know about shape, indexing, and vectorized operations carries straight over — Pandas just adds labels, mixed data types per column, and tools built specifically for real-world, messy, tabular data.</p>
+      </div>
+
+      <!-- ============ SECTION P1: INTRO TO PANDAS ============ -->
+      <section class="section" id="p1">
+        <div class="section-head">
+          <span class="section-badge">[12]</span>
+          <h2>Introduction to Pandas</h2>
+          <span class="section-shape">Series (1D) · DataFrame (2D)</span>
+        </div>
+        <p class="section-intro">Pandas is a Python library built on top of NumPy for working with tabular, labeled data — the kind you'd normally see in a spreadsheet or a database table.</p>
+
+        <table class="cmp-table">
+          <tr><th>Structure</th><th>Shape</th><th>Think of it as</th></tr>
+          <tr><td><code>Series</code></td><td>1D</td><td>A single labeled column</td></tr>
+          <tr><td><code>DataFrame</code></td><td>2D</td><td>A full labeled table — many Series side by side</td></tr>
+        </table>
+
+        <div class="callout why">NumPy arrays are fast but anonymous — element 3 is just "index 3." A DataFrame lets you say "the Score column for Emma's row" instead, which is how most real data is actually organized.</div>
+
+        <h3>Importing pandas</h3>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">setup.py</span>
+            <button class="run-btn" onclick="runCode(this,'outp1a')">Run</button>
+          </div>
+<pre class="code-body"><span class="tok-kw">import</span> pandas <span class="tok-kw">as</span> pd</pre>
+          <div class="output-panel" id="outp1a"><div class="output-inner"><span class="output-tag">output</span>(no output — the library is now ready to use)</div></div>
+        </div>
+        <div class="callout tip">Install it once from a terminal with <code>pip install pandas</code>, then import it with the <code>pd</code> alias — almost everyone does.</div>
+
+        <h3>Creating a Series</h3>
+        <p>A Series can come from a plain list (Pandas assigns a default 0,1,2… label) or a dictionary (the keys become the labels).</p>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">series.py</span>
+            <button class="run-btn" onclick="runCode(this,'outp1b')">Run</button>
+          </div>
+<pre class="code-body">s1 = pd.Series([<span class="tok-num">10</span>, <span class="tok-num">20</span>, <span class="tok-num">30</span>])
+<span class="tok-fn">print</span>(s1)
+
+s2 = pd.Series({<span class="tok-str">"Delhi"</span>: <span class="tok-num">28</span>, <span class="tok-str">"Mumbai"</span>: <span class="tok-num">31</span>, <span class="tok-str">"Pune"</span>: <span class="tok-num">26</span>})
+<span class="tok-fn">print</span>(s2)</pre>
+          <div class="output-panel" id="outp1b"><div class="output-inner"><span class="output-tag">output</span>0    10
+1    20
+2    30
+dtype: int64
+Delhi     28
+Mumbai    31
+Pune      26
+dtype: int64</div></div>
+        </div>
+
+        <h3>Creating a DataFrame</h3>
+        <p>The most common way: a dictionary where each key becomes a column name, and each value (a list) becomes that column's data.</p>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">dataframe.py</span>
+            <button class="run-btn" onclick="runCode(this,'outp1c')">Run</button>
+          </div>
+<pre class="code-body">a = {
+    <span class="tok-str">"Name"</span>: [<span class="tok-str">"Alice"</span>, <span class="tok-str">"Bob"</span>, <span class="tok-str">"Charlie"</span>],
+    <span class="tok-str">"Age"</span>: [<span class="tok-num">25</span>, <span class="tok-num">30</span>, <span class="tok-num">35</span>],
+    <span class="tok-str">"Score"</span>: [<span class="tok-num">88</span>, <span class="tok-num">92</span>, <span class="tok-num">79</span>]
+}
+df = pd.DataFrame(a)
+<span class="tok-fn">print</span>(df)</pre>
+          <div class="output-panel" id="outp1c"><div class="output-inner"><span class="output-tag">output</span>      Name  Age  Score
+0    Alice   25     88
+1      Bob   30     92
+2  Charlie   35     79</div></div>
+        </div>
+
+        <div class="viz">
+          <div class="viz-title"><span>this is what that DataFrame looks like</span></div>
+          <div class="df-viz"><table class="df-table">
+            <tr><th class="idxcell"></th><th>Name</th><th>Age</th><th>Score</th></tr>
+            <tr><td class="idxcell">0</td><td>Alice</td><td>25</td><td>88</td></tr>
+            <tr><td class="idxcell">1</td><td>Bob</td><td>30</td><td>92</td></tr>
+            <tr><td class="idxcell">2</td><td>Charlie</td><td>35</td><td>79</td></tr>
+          </table></div>
+          <div class="viz-note">The leftmost column (0, 1, 2) is the automatically generated <strong>index</strong> — it's not one of your columns, it's a label for each row.</div>
+        </div>
+
+        <h3>Creating a DataFrame from a NumPy array</h3>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">from_numpy.py</span>
+            <button class="run-btn" onclick="runCode(this,'outp1d')">Run</button>
+          </div>
+<pre class="code-body"><span class="tok-kw">import</span> numpy <span class="tok-kw">as</span> np
+
+arr = np.array([[<span class="tok-num">1</span>,<span class="tok-num">2</span>,<span class="tok-num">3</span>],[<span class="tok-num">4</span>,<span class="tok-num">5</span>,<span class="tok-num">6</span>]])
+df = pd.DataFrame(arr, columns=[<span class="tok-str">"A"</span>,<span class="tok-str">"B"</span>,<span class="tok-str">"C"</span>])
+<span class="tok-fn">print</span>(df)</pre>
+          <div class="output-panel" id="outp1d"><div class="output-inner"><span class="output-tag">output</span>   A  B  C
+0  1  2  3
+1  4  5  6</div></div>
+        </div>
+
+        <div class="callout tip">A quick look ahead: real data usually comes from a file, not a hand-typed dictionary. <code>pd.read_csv('file.csv')</code> and <code>pd.read_excel('file.xlsx')</code> load a whole spreadsheet into a DataFrame in one line. We'll lean on that idea for the rest of the course.</div>
+
+        <div class="quiz">
+          <span class="quiz-tag">quick check</span>
+          <div class="quiz-q">Which structure would you use to represent a single column of exam scores?</div>
+          <div class="quiz-opts">
+            <button class="quiz-opt" onclick="answerQuiz(this,true,'qp1')">Series</button>
+            <button class="quiz-opt" onclick="answerQuiz(this,false,'qp1')">DataFrame</button>
+          </div>
+          <div class="quiz-feedback" id="fb-qp1"></div>
+        </div>
+
+        <div class="complete-row"><button class="complete-btn" data-section="p1" onclick="toggleComplete(this)"><span class="box"></span> Mark as complete</button></div>
+      </section>
+
+      <!-- ============ SECTION P2: DATAFRAME BASICS ============ -->
+      <section class="section" id="p2">
+        <div class="section-head">
+          <span class="section-badge">[13]</span>
+          <h2>DataFrame Basics</h2>
+          <span class="section-shape">inspect · select · organize</span>
+        </div>
+        <p class="section-intro">Before doing anything else with a dataset, you inspect it. Then you learn the two core ways to select pieces of it.</p>
+
+        <h3>Inspecting a DataFrame</h3>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">inspect.py</span>
+            <button class="run-btn" onclick="runCode(this,'outp2a')">Run</button>
+          </div>
+<pre class="code-body">a = {
+    <span class="tok-str">"Name"</span>: [<span class="tok-str">"Alice"</span>,<span class="tok-str">"Bob"</span>,<span class="tok-str">"Charlie"</span>,<span class="tok-str">"David"</span>,<span class="tok-str">"Emma"</span>],
+    <span class="tok-str">"Age"</span>: [<span class="tok-num">25</span>,<span class="tok-num">30</span>,<span class="tok-num">35</span>,<span class="tok-num">40</span>,<span class="tok-num">22</span>],
+    <span class="tok-str">"Score"</span>: [<span class="tok-num">88</span>,<span class="tok-num">92</span>,<span class="tok-num">79</span>,<span class="tok-num">85</span>,<span class="tok-num">95</span>]
+}
+df = pd.DataFrame(a)
+
+<span class="tok-fn">print</span>(df.head(<span class="tok-num">3</span>))   <span class="tok-com"># first 3 rows</span>
+<span class="tok-fn">print</span>(df.shape)     <span class="tok-com"># (rows, columns)</span>
+<span class="tok-fn">print</span>(df.dtypes)    <span class="tok-com"># data type per column</span></pre>
+          <div class="output-panel" id="outp2a"><div class="output-inner"><span class="output-tag">output</span>      Name  Age  Score
+0    Alice   25     88
+1      Bob   30     92
+2  Charlie   35     79
+(5, 3)
+Name     object
+Age       int64
+Score     int64
+dtype: object</div></div>
+        </div>
+
+        <table class="cmp-table">
+          <tr><th>Method / attribute</th><th>What it tells you</th></tr>
+          <tr><td><code>head(n)</code></td><td>First n rows (default 5)</td></tr>
+          <tr><td><code>tail(n)</code></td><td>Last n rows</td></tr>
+          <tr><td><code>info()</code></td><td>Columns, non-null counts, and dtypes together</td></tr>
+          <tr><td><code>shape</code></td><td>(rows, columns)</td></tr>
+          <tr><td><code>dtypes</code></td><td>Data type of every column</td></tr>
+        </table>
+
+        <h3>Selecting columns &amp; rows</h3>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">select.py</span>
+            <button class="run-btn" onclick="runCode(this,'outp2b')">Run</button>
+          </div>
+<pre class="code-body"><span class="tok-fn">print</span>(df[<span class="tok-str">"Name"</span>])              <span class="tok-com"># single column → a Series</span>
+<span class="tok-fn">print</span>(df[[<span class="tok-str">"Name"</span>,<span class="tok-str">"Score"</span>]])   <span class="tok-com"># multiple columns → a DataFrame</span>
+
+<span class="tok-fn">print</span>(df.loc[<span class="tok-num">1</span>, <span class="tok-str">"Age"</span>])       <span class="tok-com"># label-based: row label 1, column "Age"</span>
+<span class="tok-fn">print</span>(df.iloc[<span class="tok-num">1</span>, <span class="tok-num">1</span>])          <span class="tok-com"># position-based: row 1, column 1</span></pre>
+          <div class="output-panel" id="outp2b"><div class="output-inner"><span class="output-tag">output</span>0      Alice
+1        Bob
+2    Charlie
+3      David
+4       Emma
+Name: Name, dtype: object
+30
+30</div></div>
+        </div>
+
+        <div class="viz">
+          <div class="viz-title"><span>try it — loc vs iloc</span></div>
+          <div class="df-viz"><table class="df-table" id="locIlocTable"></table></div>
+          <div class="viz-controls">
+            <button class="chip active" onclick="setLocIloc('loc',this)">.loc[1, "Age"]</button>
+            <button class="chip" onclick="setLocIloc('iloc',this)">.iloc[1, 1]</button>
+            <button class="chip" onclick="setLocIloc('col',this)">df["Name"]</button>
+          </div>
+          <div class="viz-note" id="locIlocNote"></div>
+        </div>
+
+        <div class="callout tip"><code>.loc</code> selects by the label you can see (row/column names). <code>.iloc</code> selects by plain position, counting from 0 — just like NumPy. A bare <code>:</code> means "everything" along that dimension, e.g. <code>df.loc[:, "Age"]</code>.</div>
+
+        <h3>Index, columns &amp; renaming</h3>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">index_rename.py</span>
+            <button class="run-btn" onclick="runCode(this,'outp2c')">Run</button>
+          </div>
+<pre class="code-body"><span class="tok-fn">print</span>(df.index)      <span class="tok-com"># row labels</span>
+<span class="tok-fn">print</span>(df.columns)    <span class="tok-com"># column names</span>
+
+df = df.rename(columns={<span class="tok-str">"Score"</span>: <span class="tok-str">"ExamScore"</span>})
+df = df.set_index(<span class="tok-str">"Name"</span>)     <span class="tok-com"># use Name as the row index</span>
+df = df.reset_index()      <span class="tok-com"># put Name back as a normal column</span></pre>
+          <div class="output-panel" id="outp2c"><div class="output-inner"><span class="output-tag">output</span>RangeIndex(start=0, stop=5, step=1)
+Index(['Name', 'Age', 'Score'], dtype='object')</div></div>
+        </div>
+
+        <div class="callout why">Without <code>inplace=True</code>, these methods return a <em>new</em> DataFrame rather than modifying the original — that's why the pattern is always <code>df = df.rename(...)</code>, not just <code>df.rename(...)</code> on its own.</div>
+
+        <div class="quiz">
+          <span class="quiz-tag">quick check</span>
+          <div class="quiz-q"><code>df.iloc[0, 2]</code> selects by...</div>
+          <div class="quiz-opts">
+            <button class="quiz-opt" onclick="answerQuiz(this,false,'qp2')">Row and column labels</button>
+            <button class="quiz-opt" onclick="answerQuiz(this,true,'qp2')">Row and column position, counting from 0</button>
+          </div>
+          <div class="quiz-feedback" id="fb-qp2"></div>
+        </div>
+
+        <div class="complete-row"><button class="complete-btn" data-section="p2" onclick="toggleComplete(this)"><span class="box"></span> Mark as complete</button></div>
+      </section>
+
+      <!-- ============ SECTION P3: DATA CLEANING ============ -->
+      <section class="section" id="p3">
+        <div class="section-head">
+          <span class="section-badge">[14]</span>
+          <h2>Data Cleaning Essentials</h2>
+          <span class="section-shape">missing · types · duplicates</span>
+        </div>
+        <p class="section-intro">Real datasets are messy. This section covers the standard first pass: find what's missing, fix what's mistyped, and remove what's duplicated.</p>
+
+        <h3>Handling missing values</h3>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">missing.py</span>
+            <button class="run-btn" onclick="runCode(this,'outp3a')">Run</button>
+          </div>
+<pre class="code-body">a = {
+    <span class="tok-str">"Name"</span>: [<span class="tok-str">"Alice"</span>, <span class="tok-str">"Bob"</span>, <span class="tok-str">"Charlie"</span>, <span class="tok-str">"David"</span>, <span class="tok-str">"Emma"</span>],
+    <span class="tok-str">"Age"</span>: [<span class="tok-num">25</span>, <span class="tok-kw">None</span>, <span class="tok-num">35</span>, <span class="tok-num">40</span>, <span class="tok-kw">None</span>],
+    <span class="tok-str">"Score"</span>: [<span class="tok-num">85</span>, <span class="tok-num">91</span>, np.nan, <span class="tok-num">88</span>, <span class="tok-num">95</span>]
+}
+df = pd.DataFrame(a)
+
+<span class="tok-fn">print</span>(df.isna())              <span class="tok-com"># True where a value is missing</span>
+<span class="tok-fn">print</span>(df.dropna())            <span class="tok-com"># drop any row with a missing value</span>
+<span class="tok-fn">print</span>(df.fillna(<span class="tok-num">0</span>))          <span class="tok-com"># replace missing values with 0</span></pre>
+          <div class="output-panel" id="outp3a"><div class="output-inner"><span class="output-tag">output</span>    Name    Age  Score
+0  False  False  False
+1  False   True  False
+2  False  False   True
+3  False  False  False
+4  False   True  False
+</div></div>
+        </div>
+
+        <div class="viz">
+          <div class="viz-title"><span>try it — dropna vs fillna</span></div>
+          <div class="df-viz"><table class="df-table" id="naTable"></table></div>
+          <div class="viz-controls">
+            <button class="chip active" onclick="setNaMode('raw',this)">original</button>
+            <button class="chip" onclick="setNaMode('drop',this)">dropna()</button>
+            <button class="chip" onclick="setNaMode('fill',this)">fillna(0)</button>
+          </div>
+          <div class="viz-note" id="naNote">Cells marked missing are highlighted in amber.</div>
+        </div>
+
+        <div class="callout why">Always check how much is missing before you choose. <code>dropna()</code> can throw away good data in other columns of the same row; <code>fillna()</code> keeps every row but requires picking a sensible replacement value.</div>
+
+        <h3>Changing data types</h3>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">astype.py</span>
+            <button class="run-btn" onclick="runCode(this,'outp3b')">Run</button>
+          </div>
+<pre class="code-body">df[<span class="tok-str">"Age"</span>] = df[<span class="tok-str">"Age"</span>].fillna(<span class="tok-num">0</span>).astype(<span class="tok-str">"int64"</span>)
+<span class="tok-fn">print</span>(df.dtypes)</pre>
+          <div class="output-panel" id="outp3b"><div class="output-inner"><span class="output-tag">output</span>Name      object
+Age        int64
+Score    float64
+dtype: object</div></div>
+        </div>
+
+        <h3>Replacing values</h3>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">replace.py</span>
+            <button class="run-btn" onclick="runCode(this,'outp3c')">Run</button>
+          </div>
+<pre class="code-body">df[<span class="tok-str">"City"</span>] = [<span class="tok-str">"Delhi"</span>, <span class="tok-str">"Mumbai"</span>, <span class="tok-str">"Pun"</span>, <span class="tok-str">"Bangalore"</span>, <span class="tok-str">"Chennai"</span>]
+df[<span class="tok-str">"City"</span>] = df[<span class="tok-str">"City"</span>].replace(<span class="tok-str">"Pun"</span>, <span class="tok-str">"Pune"</span>)   <span class="tok-com"># fix the typo</span>
+<span class="tok-fn">print</span>(df[<span class="tok-str">"City"</span>])</pre>
+          <div class="output-panel" id="outp3c"><div class="output-inner"><span class="output-tag">output</span>0        Delhi
+1       Mumbai
+2         Pune
+3    Bangalore
+4      Chennai
+Name: City, dtype: object</div></div>
+        </div>
+
+        <h3>Dropping rows &amp; columns</h3>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">drop.py</span>
+            <button class="run-btn" onclick="runCode(this,'outp3d')">Run</button>
+          </div>
+<pre class="code-body">df = df.drop(<span class="tok-str">"Score"</span>, axis=<span class="tok-num">1</span>)    <span class="tok-com"># drop a column</span>
+df = df.drop(<span class="tok-num">0</span>, axis=<span class="tok-num">0</span>)           <span class="tok-com"># drop the row labeled 0</span></pre>
+          <div class="output-panel" id="outp3d"><div class="output-inner"><span class="output-tag">output</span>(DataFrame returned with the "Score" column and row 0 removed)</div></div>
+        </div>
+
+        <h3>Detecting &amp; removing duplicates</h3>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">duplicates.py</span>
+            <button class="run-btn" onclick="runCode(this,'outp3e')">Run</button>
+          </div>
+<pre class="code-body">data = {
+    <span class="tok-str">"Name"</span>: [<span class="tok-str">"Alice"</span>, <span class="tok-str">"Bob"</span>, <span class="tok-str">"Charlie"</span>, <span class="tok-str">"Alice"</span>, <span class="tok-str">"Bob"</span>, <span class="tok-str">"David"</span>],
+    <span class="tok-str">"Age"</span>: [<span class="tok-num">25</span>, <span class="tok-num">30</span>, <span class="tok-num">35</span>, <span class="tok-num">25</span>, <span class="tok-num">30</span>, <span class="tok-num">40</span>],
+    <span class="tok-str">"Score"</span>: [<span class="tok-num">88</span>, <span class="tok-num">92</span>, <span class="tok-num">79</span>, <span class="tok-num">88</span>, <span class="tok-num">92</span>, <span class="tok-num">85</span>]
+}
+df = pd.DataFrame(data)
+
+<span class="tok-fn">print</span>(df.duplicated())        <span class="tok-com"># True for rows seen before</span>
+<span class="tok-fn">print</span>(df.drop_duplicates())  <span class="tok-com"># keeps only the first occurrence</span></pre>
+          <div class="output-panel" id="outp3e"><div class="output-inner"><span class="output-tag">output</span>0    False
+1    False
+2    False
+3     True
+4     True
+5    False
+dtype: bool
+      Name  Age  Score
+0    Alice   25     88
+1      Bob   30     92
+2  Charlie   35     79
+5    David   40     85</div></div>
+        </div>
+
+        <div class="quiz">
+          <span class="quiz-tag">quick check</span>
+          <div class="quiz-q">A column of ages was loaded as text ("25", "30"...). Which method fixes this?</div>
+          <div class="quiz-opts">
+            <button class="quiz-opt" onclick="answerQuiz(this,false,'qp3')">replace()</button>
+            <button class="quiz-opt" onclick="answerQuiz(this,true,'qp3')">astype()</button>
+            <button class="quiz-opt" onclick="answerQuiz(this,false,'qp3')">drop_duplicates()</button>
+          </div>
+          <div class="quiz-feedback" id="fb-qp3"></div>
+        </div>
+
+        <div class="challenge">
+          <span class="challenge-tag">practice challenge</span>
+          You have a DataFrame with a "City" column containing the typo "Bangalor". Write one line to fix every occurrence.
+          <details><summary>Show a solution</summary><div class="reveal"><code>df["City"] = df["City"].replace("Bangalor", "Bangalore")</code></div></details>
+        </div>
+
+        <div class="complete-row"><button class="complete-btn" data-section="p3" onclick="toggleComplete(this)"><span class="box"></span> Mark as complete</button></div>
+      </section>
+
+      <!-- ============ SECTION P4: SELECTION & FILTERING ============ -->
+      <section class="section" id="p4">
+        <div class="section-head">
+          <span class="section-badge">[15]</span>
+          <h2>Selection &amp; Filtering</h2>
+          <span class="section-shape">boolean · query · text</span>
+        </div>
+        <p class="section-intro">Just like NumPy's boolean masks, DataFrames filter rows using conditions — with a few extra conveniences for readability.</p>
+
+        <h3>Boolean indexing</h3>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">boolean.py</span>
+            <button class="run-btn" onclick="runCode(this,'outp4a')">Run</button>
+          </div>
+<pre class="code-body">df = pd.DataFrame({
+    <span class="tok-str">"Name"</span>: [<span class="tok-str">"Alice"</span>,<span class="tok-str">"Bob"</span>,<span class="tok-str">"Charlie"</span>,<span class="tok-str">"David"</span>,<span class="tok-str">"Emma"</span>],
+    <span class="tok-str">"Age"</span>: [<span class="tok-num">25</span>,<span class="tok-num">30</span>,<span class="tok-num">35</span>,<span class="tok-num">40</span>,<span class="tok-num">22</span>],
+    <span class="tok-str">"City"</span>: [<span class="tok-str">"Delhi"</span>,<span class="tok-str">"Mumbai"</span>,<span class="tok-str">"Pune"</span>,<span class="tok-str">"Bangalore"</span>,<span class="tok-str">"Chennai"</span>],
+    <span class="tok-str">"Score"</span>: [<span class="tok-num">85</span>,<span class="tok-num">91</span>,<span class="tok-num">78</span>,<span class="tok-num">88</span>,<span class="tok-num">95</span>]
+})
+
+<span class="tok-fn">print</span>(df[df[<span class="tok-str">"Age"</span>] > <span class="tok-num">25</span>])
+<span class="tok-fn">print</span>(df[(df[<span class="tok-str">"Age"</span>] > <span class="tok-num">25</span>) & (df[<span class="tok-str">"Score"</span>] > <span class="tok-num">85</span>)])</pre>
+          <div class="output-panel" id="outp4a"><div class="output-inner"><span class="output-tag">output</span>      Name  Age       City  Score
+1      Bob   30     Mumbai     91
+2  Charlie   35       Pune     78
+3    David   40  Bangalore     88
+
+      Name  Age    City  Score
+1      Bob   30  Mumbai     91</div></div>
+        </div>
+
+        <div class="viz">
+          <div class="viz-title"><span>try it — build a condition</span></div>
+          <div class="df-viz"><table class="df-table" id="filterTable"></table></div>
+          <div class="viz-controls">
+            <label style="font-family:var(--font-mono);font-size:0.78rem;">Age &gt; <input type="range" id="ageThresh" min="20" max="45" value="25" style="width:100px;" oninput="renderFilterTable()"></label>
+            <label style="font-family:var(--font-mono);font-size:0.78rem;"><input type="checkbox" id="scoreCheck" onchange="renderFilterTable()"> and Score &gt; 85</label>
+          </div>
+          <div class="viz-note" id="filterNote"></div>
+        </div>
+
+        <div class="callout tip">Combine conditions with <code>&amp;</code> (and), <code>|</code> (or), <code>~</code> (not) — never Python's plain <code>and</code>/<code>or</code>. Each condition needs its own parentheses, since <code>&amp;</code> binds tighter than <code>&gt;</code>.</div>
+
+        <h3>Filtering with query()</h3>
+        <p><code>query()</code> lets you write the same logic as a plain string — often easier to read for complex conditions.</p>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">query.py</span>
+            <button class="run-btn" onclick="runCode(this,'outp4b')">Run</button>
+          </div>
+<pre class="code-body">min_score = <span class="tok-num">85</span>
+<span class="tok-fn">print</span>(df.query(<span class="tok-str">"Score >= @min_score and Age < 35"</span>))</pre>
+          <div class="output-panel" id="outp4b"><div class="output-inner"><span class="output-tag">output</span>    Name  Age    City  Score
+0  Alice   25   Delhi     85
+1    Bob   30  Mumbai     91</div></div>
+        </div>
+
+        <div class="callout tip">The <code>@</code> symbol inside <code>query()</code> lets you reference a normal Python variable, like <code>min_score</code>, instead of hardcoding the number.</div>
+
+        <h3>String operations</h3>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">str_ops.py</span>
+            <button class="run-btn" onclick="runCode(this,'outp4c')">Run</button>
+          </div>
+<pre class="code-body"><span class="tok-fn">print</span>(df[<span class="tok-str">"City"</span>].str.lower())
+<span class="tok-fn">print</span>(df[df[<span class="tok-str">"City"</span>].str.contains(<span class="tok-str">"a"</span>)])
+df[<span class="tok-str">"City"</span>] = df[<span class="tok-str">"City"</span>].str.replace(<span class="tok-str">"Delhi"</span>, <span class="tok-str">"New Delhi"</span>)</pre>
+          <div class="output-panel" id="outp4c"><div class="output-inner"><span class="output-tag">output</span>0        delhi
+1       mumbai
+2         pune
+3    bangalore
+4      chennai
+Name: City, dtype: object</div></div>
+        </div>
+
+        <div class="callout why">The <code>.str</code> accessor applies a string method to every row of a column at once — the vectorized equivalent of looping through and calling <code>.lower()</code> on each value yourself.</div>
+
+        <div class="quiz">
+          <span class="quiz-tag">quick check</span>
+          <div class="quiz-q">Which correctly combines two conditions in Pandas?</div>
+          <div class="quiz-opts">
+            <button class="quiz-opt" onclick="answerQuiz(this,false,'qp4')">df[df.Age > 25 and df.Score > 85]</button>
+            <button class="quiz-opt" onclick="answerQuiz(this,true,'qp4')">df[(df.Age > 25) & (df.Score > 85)]</button>
+          </div>
+          <div class="quiz-feedback" id="fb-qp4"></div>
+        </div>
+
+        <div class="complete-row"><button class="complete-btn" data-section="p4" onclick="toggleComplete(this)"><span class="box"></span> Mark as complete</button></div>
+      </section>
+
+      <!-- ============ SECTION P5: SORTING & STATISTICS ============ -->
+      <section class="section" id="p5">
+        <div class="section-head">
+          <span class="section-badge">[16]</span>
+          <h2>Sorting &amp; Basic Statistics</h2>
+          <span class="section-shape">order &amp; summarize</span>
+        </div>
+        <p class="section-intro">Once your data is clean, you'll usually want to order it and get a quick statistical read on it.</p>
+
+        <h3>Sorting</h3>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">sort.py</span>
+            <button class="run-btn" onclick="runCode(this,'outp5a')">Run</button>
+          </div>
+<pre class="code-body"><span class="tok-fn">print</span>(df.sort_values(<span class="tok-str">"Score"</span>, ascending=<span class="tok-kw">False</span>))
+<span class="tok-fn">print</span>(df.sort_values([<span class="tok-str">"City"</span>,<span class="tok-str">"Age"</span>]))   <span class="tok-com"># sort by multiple columns</span>
+<span class="tok-fn">print</span>(df.sort_index())                    <span class="tok-com"># sort by the row index</span></pre>
+          <div class="output-panel" id="outp5a"><div class="output-inner"><span class="output-tag">output</span>      Name  Age       City  Score
+4     Emma   22    Chennai     95
+1      Bob   30     Mumbai     91
+3    David   40  Bangalore     88
+0    Alice   25      Delhi     85
+2  Charlie   35       Pune     78</div></div>
+        </div>
+
+        <h3>Descriptive statistics</h3>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">describe.py</span>
+            <button class="run-btn" onclick="runCode(this,'outp5b')">Run</button>
+          </div>
+<pre class="code-body"><span class="tok-fn">print</span>(df[<span class="tok-str">"Score"</span>].mean())
+<span class="tok-fn">print</span>(df[<span class="tok-str">"Score"</span>].median())
+<span class="tok-fn">print</span>(df[<span class="tok-str">"Score"</span>].std())
+<span class="tok-fn">print</span>(df.describe())</pre>
+          <div class="output-panel" id="outp5b"><div class="output-inner"><span class="output-tag">output</span>87.4
+88.0
+6.348...
+
+             Age      Score
+count   5.000000   5.000000
+mean   30.400000  87.400000
+std     6.988564   6.348...
+min    22.000000  78.000000
+25%    25.000000  85.000000
+50%    30.000000  88.000000
+75%    35.000000  91.000000
+max    40.000000  95.000000</div></div>
+        </div>
+
+        <div class="callout why"><code>describe()</code> is usually the very first thing to run on new data — one call gives you count, center, spread, and range for every numeric column at once.</div>
+
+        <h3>Counting values</h3>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">value_counts.py</span>
+            <button class="run-btn" onclick="runCode(this,'outp5c')">Run</button>
+          </div>
+<pre class="code-body">cities = pd.Series([<span class="tok-str">"Delhi"</span>,<span class="tok-str">"Mumbai"</span>,<span class="tok-str">"Delhi"</span>,<span class="tok-str">"Pune"</span>,<span class="tok-str">"Delhi"</span>])
+<span class="tok-fn">print</span>(cities.value_counts())
+<span class="tok-fn">print</span>(cities.value_counts(normalize=<span class="tok-kw">True</span>))  <span class="tok-com"># as percentages</span></pre>
+          <div class="output-panel" id="outp5c"><div class="output-inner"><span class="output-tag">output</span>Delhi     3
+Mumbai    1
+Pune      1
+Name: count, dtype: int64
+Delhi     0.6
+Mumbai    0.2
+Pune      0.2
+Name: proportion, dtype: float64</div></div>
+        </div>
+
+        <h3>Correlation &amp; covariance</h3>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">corr.py</span>
+            <button class="run-btn" onclick="runCode(this,'outp5d')">Run</button>
+          </div>
+<pre class="code-body"><span class="tok-fn">print</span>(df[[<span class="tok-str">"Age"</span>,<span class="tok-str">"Score"</span>]].corr())
+<span class="tok-fn">print</span>(df[[<span class="tok-str">"Age"</span>,<span class="tok-str">"Score"</span>]].cov())</pre>
+          <div class="output-panel" id="outp5d"><div class="output-inner"><span class="output-tag">output</span>            Age     Score
+Age    1.000000 -0.523...
+Score -0.523...  1.000000</div></div>
+        </div>
+
+        <div class="callout tip">Correlation ranges from -1 to +1. Close to 0 means little linear relationship; close to ±1 means the two columns move strongly together (+) or oppositely (-).</div>
+
+        <div class="quiz">
+          <span class="quiz-tag">quick check</span>
+          <div class="quiz-q">Two columns have a correlation of -0.9. What does that suggest?</div>
+          <div class="quiz-opts">
+            <button class="quiz-opt" onclick="answerQuiz(this,false,'qp5')">They are unrelated</button>
+            <button class="quiz-opt" onclick="answerQuiz(this,true,'qp5')">As one increases, the other tends to decrease</button>
+          </div>
+          <div class="quiz-feedback" id="fb-qp5"></div>
+        </div>
+
+        <div class="complete-row"><button class="complete-btn" data-section="p5" onclick="toggleComplete(this)"><span class="box"></span> Mark as complete</button></div>
+      </section>
+
+      <!-- ============ SECTION P6: GROUPBY ============ -->
+      <section class="section" id="p6">
+        <div class="section-head">
+          <span class="section-badge">[17]</span>
+          <h2>GroupBy &amp; Aggregations</h2>
+          <span class="section-shape">split → apply → combine</span>
+        </div>
+        <p class="section-intro">Grouping is how you answer questions like "average salary <em>per department</em>" instead of just "average salary overall."</p>
+
+        <div class="viz">
+          <div class="viz-title"><span>the idea behind groupby</span></div>
+          <div class="viz-row" style="align-items:center;gap:18px;flex-wrap:wrap;">
+            <div style="font-family:var(--font-mono);font-size:0.85rem;text-align:center;"><strong>Split</strong><br><span style="color:var(--ink-soft);font-size:0.75rem;">by Department</span></div>
+            <div style="color:var(--ink-soft);">→</div>
+            <div style="font-family:var(--font-mono);font-size:0.85rem;text-align:center;"><strong>Apply</strong><br><span style="color:var(--ink-soft);font-size:0.75rem;">mean(), max()…</span></div>
+            <div style="color:var(--ink-soft);">→</div>
+            <div style="font-family:var(--font-mono);font-size:0.85rem;text-align:center;"><strong>Combine</strong><br><span style="color:var(--ink-soft);font-size:0.75rem;">one row per group</span></div>
+          </div>
+        </div>
+
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">groupby.py</span>
+            <button class="run-btn" onclick="runCode(this,'outp6a')">Run</button>
+          </div>
+<pre class="code-body">data = {
+    <span class="tok-str">"Department"</span>: [<span class="tok-str">"Sales"</span>,<span class="tok-str">"Sales"</span>,<span class="tok-str">"Tech"</span>,<span class="tok-str">"Tech"</span>,<span class="tok-str">"Tech"</span>],
+    <span class="tok-str">"Employee"</span>: [<span class="tok-str">"Ann"</span>,<span class="tok-str">"Ben"</span>,<span class="tok-str">"Cara"</span>,<span class="tok-str">"Dev"</span>,<span class="tok-str">"Eli"</span>],
+    <span class="tok-str">"Salary"</span>: [<span class="tok-num">50000</span>,<span class="tok-num">54000</span>,<span class="tok-num">62000</span>,<span class="tok-num">58000</span>,<span class="tok-num">71000</span>],
+    <span class="tok-str">"Age"</span>: [<span class="tok-num">29</span>,<span class="tok-num">34</span>,<span class="tok-num">26</span>,<span class="tok-num">31</span>,<span class="tok-num">40</span>]
+}
+df = pd.DataFrame(data)
+
+<span class="tok-fn">print</span>(df.groupby(<span class="tok-str">"Department"</span>)[<span class="tok-str">"Salary"</span>].mean())</pre>
+          <div class="output-panel" id="outp6a"><div class="output-inner"><span class="output-tag">output</span>Department
+Sales    52000.0
+Tech     63666.7
+Name: Salary, dtype: float64</div></div>
+        </div>
+
+        <div class="viz">
+          <div class="viz-title"><span>try it — group by department</span></div>
+          <div class="df-viz"><table class="df-table" id="groupbyTable"></table></div>
+          <div class="viz-note">Rows with matching color share a Department — grouping collapses each color into a single summary row.</div>
+        </div>
+
+        <h3>Multiple aggregations with agg()</h3>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">agg.py</span>
+            <button class="run-btn" onclick="runCode(this,'outp6b')">Run</button>
+          </div>
+<pre class="code-body"><span class="tok-fn">print</span>(df.groupby(<span class="tok-str">"Department"</span>).agg({<span class="tok-str">"Salary"</span>: <span class="tok-str">"mean"</span>, <span class="tok-str">"Age"</span>: <span class="tok-str">"max"</span>}))</pre>
+          <div class="output-panel" id="outp6b"><div class="output-inner"><span class="output-tag">output</span>              Salary  Age
+Department
+Sales        52000.0   34
+Tech         63666.7   40</div></div>
+        </div>
+
+        <h3>Pivot tables &amp; crosstab</h3>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">pivot.py</span>
+            <button class="run-btn" onclick="runCode(this,'outp6c')">Run</button>
+          </div>
+<pre class="code-body">df[<span class="tok-str">"City"</span>] = [<span class="tok-str">"Delhi"</span>,<span class="tok-str">"Mumbai"</span>,<span class="tok-str">"Delhi"</span>,<span class="tok-str">"Mumbai"</span>,<span class="tok-str">"Delhi"</span>]
+
+<span class="tok-fn">print</span>(pd.pivot_table(df, values=<span class="tok-str">"Salary"</span>, index=<span class="tok-str">"Department"</span>, columns=<span class="tok-str">"City"</span>, aggfunc=<span class="tok-str">"mean"</span>))
+<span class="tok-fn">print</span>(pd.crosstab(df[<span class="tok-str">"Department"</span>], df[<span class="tok-str">"City"</span>]))</pre>
+          <div class="output-panel" id="outp6c"><div class="output-inner"><span class="output-tag">output</span>City          Delhi   Mumbai
+Department
+Sales       50000.0  54000.0
+Tech        66500.0  58000.0
+
+City         Delhi  Mumbai
+Department
+Sales            1        1
+Tech             2        1</div></div>
+        </div>
+
+        <div class="callout why"><code>pivot_table</code> summarizes a numeric value across two categories — like an Excel pivot table. <code>crosstab</code> is the special case where you just want a count of how often combinations occur.</div>
+
+        <div class="quiz">
+          <span class="quiz-tag">quick check</span>
+          <div class="quiz-q">You want the average Salary AND the max Age, per Department, in one call. Which do you reach for?</div>
+          <div class="quiz-opts">
+            <button class="quiz-opt" onclick="answerQuiz(this,false,'qp6')">groupby("Department").mean()</button>
+            <button class="quiz-opt" onclick="answerQuiz(this,true,'qp6')">groupby("Department").agg({...})</button>
+          </div>
+          <div class="quiz-feedback" id="fb-qp6"></div>
+        </div>
+
+        <div class="complete-row"><button class="complete-btn" data-section="p6" onclick="toggleComplete(this)"><span class="box"></span> Mark as complete</button></div>
+      </section>
+
+      <!-- ============ SECTION P7: MERGING & JOINING ============ -->
+      <section class="section" id="p7">
+        <div class="section-head">
+          <span class="section-badge">[18]</span>
+          <h2>Merging, Joining &amp; Concatenation</h2>
+          <span class="section-shape">combine tables</span>
+        </div>
+        <p class="section-intro">Data rarely lives in one table. These three tools stitch multiple DataFrames back into one.</p>
+
+        <h3>concat() for stacking</h3>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">concat.py</span>
+            <button class="run-btn" onclick="runCode(this,'outp7a')">Run</button>
+          </div>
+<pre class="code-body">df1 = pd.DataFrame({<span class="tok-str">"Product"</span>:[<span class="tok-str">"Pen"</span>,<span class="tok-str">"Book"</span>], <span class="tok-str">"Price"</span>:[<span class="tok-num">10</span>,<span class="tok-num">50</span>]})
+df2 = pd.DataFrame({<span class="tok-str">"Product"</span>:[<span class="tok-str">"Bag"</span>], <span class="tok-str">"Price"</span>:[<span class="tok-num">300</span>]})
+
+<span class="tok-fn">print</span>(pd.concat([df1, df2], ignore_index=<span class="tok-kw">True</span>))   <span class="tok-com"># axis=0, stacked as rows</span></pre>
+          <div class="output-panel" id="outp7a"><div class="output-inner"><span class="output-tag">output</span>  Product  Price
+0     Pen     10
+1    Book     50
+2     Bag    300</div></div>
+        </div>
+
+        <h3>merge() for SQL-style joins</h3>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">merge.py</span>
+            <button class="run-btn" onclick="runCode(this,'outp7b')">Run</button>
+          </div>
+<pre class="code-body">sales = pd.DataFrame({<span class="tok-str">"Product"</span>:[<span class="tok-str">"Pen"</span>,<span class="tok-str">"Book"</span>,<span class="tok-str">"Bag"</span>], <span class="tok-str">"Units"</span>:[<span class="tok-num">100</span>,<span class="tok-num">40</span>,<span class="tok-num">5</span>]})
+revenue = pd.DataFrame({<span class="tok-str">"Product"</span>:[<span class="tok-str">"Pen"</span>,<span class="tok-str">"Book"</span>], <span class="tok-str">"Revenue"</span>:[<span class="tok-num">1000</span>,<span class="tok-num">2000</span>]})
+
+<span class="tok-fn">print</span>(pd.merge(sales, revenue, on=<span class="tok-str">"Product"</span>, how=<span class="tok-str">"inner"</span>))
+<span class="tok-fn">print</span>(pd.merge(sales, revenue, on=<span class="tok-str">"Product"</span>, how=<span class="tok-str">"left"</span>))</pre>
+          <div class="output-panel" id="outp7b"><div class="output-inner"><span class="output-tag">output</span>  Product  Units  Revenue
+0     Pen    100     1000
+1    Book     40     2000
+
+  Product  Units  Revenue
+0     Pen    100   1000.0
+1    Book     40   2000.0
+2     Bag      5      NaN</div></div>
+        </div>
+
+        <div class="viz">
+          <div class="viz-title"><span>try it — join types</span></div>
+          <div class="df-viz"><table class="df-table" id="mergeTable"></table></div>
+          <div class="viz-controls">
+            <button class="chip active" onclick="setMergeMode('inner',this)">inner</button>
+            <button class="chip" onclick="setMergeMode('left',this)">left</button>
+            <button class="chip" onclick="setMergeMode('outer',this)">outer</button>
+          </div>
+          <div class="viz-note" id="mergeNote"></div>
+        </div>
+
+        <table class="cmp-table">
+          <tr><th>how=</th><th>Keeps</th></tr>
+          <tr><td><code>inner</code></td><td>Only rows with a match in both tables</td></tr>
+          <tr><td><code>left</code></td><td>All rows from the left table, filling gaps with NaN</td></tr>
+          <tr><td><code>right</code></td><td>All rows from the right table, filling gaps with NaN</td></tr>
+          <tr><td><code>outer</code></td><td>Every row from both tables, filling gaps with NaN</td></tr>
+        </table>
+
+        <h3>join() for index alignment</h3>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">join.py</span>
+            <button class="run-btn" onclick="runCode(this,'outp7c')">Run</button>
+          </div>
+<pre class="code-body">products = pd.DataFrame({<span class="tok-str">"Price"</span>:[<span class="tok-num">10</span>,<span class="tok-num">50</span>,<span class="tok-num">300</span>]}, index=[<span class="tok-str">"Pen"</span>,<span class="tok-str">"Book"</span>,<span class="tok-str">"Bag"</span>])
+stock = pd.DataFrame({<span class="tok-str">"Stock"</span>:[<span class="tok-num">120</span>,<span class="tok-num">75</span>,<span class="tok-num">10</span>]}, index=[<span class="tok-str">"Pen"</span>,<span class="tok-str">"Book"</span>,<span class="tok-str">"Bag"</span>])
+
+<span class="tok-fn">print</span>(products.join(stock))   <span class="tok-com"># aligns rows by their shared index</span></pre>
+          <div class="output-panel" id="outp7c"><div class="output-inner"><span class="output-tag">output</span>      Price  Stock
+Pen      10    120
+Book     50     75
+Bag     300     10</div></div>
+        </div>
+
+        <div class="quiz">
+          <span class="quiz-tag">quick check</span>
+          <div class="quiz-q">You merge Sales (3 products) with Revenue (2 products) using how="inner". How many rows result?</div>
+          <div class="quiz-opts">
+            <button class="quiz-opt" onclick="answerQuiz(this,false,'qp7')">3 — all rows from Sales</button>
+            <button class="quiz-opt" onclick="answerQuiz(this,true,'qp7')">2 — only products present in both</button>
+          </div>
+          <div class="quiz-feedback" id="fb-qp7"></div>
+        </div>
+
+        <div class="complete-row"><button class="complete-btn" data-section="p7" onclick="toggleComplete(this)"><span class="box"></span> Mark as complete</button></div>
+      </section>
+
+      <!-- ============ SECTION P8: TIME SERIES ============ -->
+      <section class="section" id="p8">
+        <div class="section-head">
+          <span class="section-badge">[19]</span>
+          <h2>Working with Time Series</h2>
+          <span class="section-shape">dates &amp; resampling</span>
+        </div>
+        <p class="section-intro">Once a column is recognized as an actual date rather than plain text, Pandas unlocks date-aware filtering and time-based summarizing.</p>
+
+        <h3>Converting to datetime</h3>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">to_datetime.py</span>
+            <button class="run-btn" onclick="runCode(this,'outp8a')">Run</button>
+          </div>
+<pre class="code-body">data = {
+    <span class="tok-str">"VisitDate"</span>: [<span class="tok-str">"2024-01-05"</span>, <span class="tok-str">"2024-01-12"</span>, <span class="tok-str">"2024-02-03"</span>, <span class="tok-str">"2024-02-20"</span>],
+    <span class="tok-str">"Visitors"</span>: [<span class="tok-num">120</span>, <span class="tok-num">98</span>, <span class="tok-num">150</span>, <span class="tok-num">175</span>]
+}
+df = pd.DataFrame(data)
+df[<span class="tok-str">"VisitDate"</span>] = pd.to_datetime(df[<span class="tok-str">"VisitDate"</span>])
+<span class="tok-fn">print</span>(df.dtypes)</pre>
+          <div class="output-panel" id="outp8a"><div class="output-inner"><span class="output-tag">output</span>VisitDate    datetime64[ns]
+Visitors              int64
+dtype: object</div></div>
+        </div>
+
+        <h3>Setting a datetime index &amp; resampling</h3>
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">resample.py</span>
+            <button class="run-btn" onclick="runCode(this,'outp8b')">Run</button>
+          </div>
+<pre class="code-body">df = df.set_index(<span class="tok-str">"VisitDate"</span>)
+
+<span class="tok-fn">print</span>(df.resample(<span class="tok-str">"ME"</span>).sum())    <span class="tok-com"># total visitors per month</span>
+<span class="tok-fn">print</span>(df.resample(<span class="tok-str">"W"</span>).mean())    <span class="tok-com"># average visitors per week</span></pre>
+          <div class="output-panel" id="outp8b"><div class="output-inner"><span class="output-tag">output</span>           Visitors
+VisitDate
+2024-01-31       218
+2024-02-29       325</div></div>
+        </div>
+
+        <div class="viz">
+          <div class="viz-title"><span>see it — resampling groups dates into buckets</span></div>
+          <div class="df-viz"><table class="df-table">
+            <tr><th class="idxcell"></th><th>VisitDate</th><th>Visitors</th></tr>
+            <tr class="hi-row"><td class="idxcell">0</td><td>2024-01-05</td><td>120</td></tr>
+            <tr class="hi-row"><td class="idxcell">1</td><td>2024-01-12</td><td>98</td></tr>
+            <tr><td class="idxcell">2</td><td>2024-02-03</td><td>150</td></tr>
+            <tr><td class="idxcell">3</td><td>2024-02-20</td><td>175</td></tr>
+          </table></div>
+          <div class="viz-note">The two January rows (highlighted) get summed into one <code>2024-01-31</code> bucket; the two February rows form the next bucket — that's <code>resample("ME").sum()</code> in action.</div>
+        </div>
+
+        <div class="callout tip">Common resample rules: <code>"D"</code> daily, <code>"W"</code> weekly, <code>"ME"</code> month-end, <code>"YE"</code> year-end. Pick the rule based on how coarse you want the summary to be.</div>
+
+        <div class="quiz">
+          <span class="quiz-tag">quick check</span>
+          <div class="quiz-q">Before you can resample by month, what must be true about your DataFrame?</div>
+          <div class="quiz-opts">
+            <button class="quiz-opt" onclick="answerQuiz(this,true,'qp8')">Its index must be a datetime column</button>
+            <button class="quiz-opt" onclick="answerQuiz(this,false,'qp8')">It must have exactly 12 rows</button>
+          </div>
+          <div class="quiz-feedback" id="fb-qp8"></div>
+        </div>
+
+        <div class="complete-row"><button class="complete-btn" data-section="p8" onclick="toggleComplete(this)"><span class="box"></span> Mark as complete</button></div>
+      </section>
+
+      <!-- ============ SECTION P9: APPLY / MAP ============ -->
+      <section class="section" id="p9">
+        <div class="section-head">
+          <span class="section-badge">[20]</span>
+          <h2>Apply, Map &amp; Performance</h2>
+          <span class="section-shape">custom logic, efficiently</span>
+        </div>
+        <p class="section-intro">Built-in methods cover most needs, but sometimes you need your own logic applied across a column or row.</p>
+
+        <div class="code-card">
+          <div class="code-topbar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-label">apply_map.py</span>
+            <button class="run-btn" onclick="runCode(this,'outp9a')">Run</button>
+          </div>
+<pre class="code-body">df = pd.DataFrame({<span class="tok-str">"Name"</span>:[<span class="tok-str">"Alice"</span>,<span class="tok-str">"Bob"</span>,<span class="tok-str">"Charlie"</span>], <span class="tok-str">"Score"</span>:[<span class="tok-num">85</span>,<span class="tok-num">91</span>,<span class="tok-num">78</span>]})
+
+<span class="tok-com"># map(): element-wise, works on a Series</span>
+df[<span class="tok-str">"Grade"</span>] = df[<span class="tok-str">"Score"</span>].map(<span class="tok-kw">lambda</span> s: <span class="tok-str">"Pass"</span> <span class="tok-kw">if</span> s >= <span class="tok-num">80</span> <span class="tok-kw">else</span> <span class="tok-str">"Fail"</span>)
+
+<span class="tok-com"># apply(): works on a Series OR row-by-row across a DataFrame</span>
+df[<span class="tok-str">"NameLength"</span>] = df[<span class="tok-str">"Name"</span>].apply(<span class="tok-fn">len</span>)
+
+<span class="tok-fn">print</span>(df)</pre>
+          <div class="output-panel" id="outp9a"><div class="output-inner"><span class="output-tag">output</span>      Name  Score Grade  NameLength
+0    Alice     85  Pass           5
+1      Bob     91  Pass           3
+2  Charlie     78  Fail           7</div></div>
+        </div>
+
+        <table class="cmp-table">
+          <tr><th>Method</th><th>Works on</th><th>Use it for</th></tr>
+          <tr><td><code>map()</code></td><td>A Series, element by element</td><td>Simple lookups or transformations</td></tr>
+          <tr><td><code>apply()</code></td><td>A Series, or whole rows/columns of a DataFrame</td><td>Custom logic that plain vectorized methods can't express</td></tr>
+        </table>
+
+        <div class="callout why">Reach for <code>apply()</code>/<code>map()</code> only when a direct vectorized operation (like <code>df["Score"] * 2</code> or <code>.str.lower()</code>) can't express what you need — a Python-level function called once per row is noticeably slower than an operation NumPy/Pandas can run internally in bulk.</div>
+
+        <div class="quiz">
+          <span class="quiz-tag">quick check</span>
+          <div class="quiz-q">You need the length of every name in a column. What's the more efficient choice?</div>
+          <div class="quiz-opts">
+            <button class="quiz-opt" onclick="answerQuiz(this,false,'qp9')">Loop through the DataFrame with a for-loop</button>
+            <button class="quiz-opt" onclick="answerQuiz(this,true,'qp9')">df["Name"].apply(len) or df["Name"].str.len()</button>
+          </div>
+          <div class="quiz-feedback" id="fb-qp9"></div>
+        </div>
+
+        <div class="complete-row"><button class="complete-btn" data-section="p9" onclick="toggleComplete(this)"><span class="box"></span> Mark as complete</button></div>
+      </section>
+
+      <!-- ============ SECTION P10: COURSE SUMMARY ============ -->
+      <section class="section" id="p10">
+        <div class="section-head">
+          <span class="section-badge">[21]</span>
+          <h2>Course Summary &amp; Practice</h2>
+          <span class="section-shape">numpy + pandas, together</span>
+        </div>
+        <p class="section-intro">You've now covered the full path from raw numbers to labeled, cleaned, analyzable tables.</p>
+
+        <div class="summary-grid">
+          <div class="summary-item"><span class="n">12</span> Series &amp; DataFrame basics</div>
+          <div class="summary-item"><span class="n">13</span> head/tail/info · loc/iloc</div>
+          <div class="summary-item"><span class="n">14</span> isna · fillna · astype · duplicates</div>
+          <div class="summary-item"><span class="n">15</span> Boolean filtering · query() · .str</div>
+          <div class="summary-item"><span class="n">16</span> sort_values · describe · corr</div>
+          <div class="summary-item"><span class="n">17</span> groupby · agg · pivot_table</div>
+          <div class="summary-item"><span class="n">18</span> concat · merge · join</div>
+          <div class="summary-item"><span class="n">19</span> to_datetime · resample</div>
+          <div class="summary-item"><span class="n">20</span> apply · map</div>
+        </div>
+
+        <h3>Capstone challenges</h3>
+
+        <div class="challenge">
+          <span class="challenge-tag">challenge 1</span>
+          Load a messy dataset with missing ages and a typo'd city. Clean it: fill missing ages with the column mean, fix the typo, then drop duplicate rows.
+          <details><summary>Show a solution</summary><div class="reveal"><code>df["Age"] = df["Age"].fillna(df["Age"].mean())<br>df["City"] = df["City"].replace("Bangalor", "Bangalore")<br>df = df.drop_duplicates()</code></div></details>
+        </div>
+
+        <div class="challenge">
+          <span class="challenge-tag">challenge 2</span>
+          Given Employees and Departments as two DataFrames sharing a "DeptID" column, merge them, then find the average Salary per Department using groupby.
+          <details><summary>Show a solution</summary><div class="reveal"><code>merged = pd.merge(employees, departments, on="DeptID")<br>merged.groupby("Department")["Salary"].mean()</code></div></details>
+        </div>
+
+        <div class="challenge">
+          <span class="challenge-tag">challenge 3</span>
+          You have daily sales figures with a date column. Convert it to datetime, set it as the index, and find total sales per week.
+          <details><summary>Show a solution</summary><div class="reveal"><code>df["Date"] = pd.to_datetime(df["Date"])<br>df = df.set_index("Date")<br>df.resample("W").sum()</code></div></details>
+        </div>
+
+        <div class="callout why">NumPy taught you how numbers are organized in memory. Pandas taught you how to label, clean, filter, and summarize them like a real dataset. Together, they're the foundation nearly every data analysis or machine learning workflow in Python is built on.</div>
+
+        <div class="complete-row"><button class="complete-btn" data-section="p10" onclick="toggleComplete(this)"><span class="box"></span> Mark as complete</button></div>
+      </section>
+
+    </div>
+
+    <footer class="site-end">np.array(["thanks for", "learning", "with us"]) · pd.DataFrame(["see you", "next time"])</footer>
+  </div>
+</div>
+
+<script>
+/* ============ Progress tracking ============ */
+const sections = ['welcome','s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','p1','p2','p3','p4','p5','p6','p7','p8','p9','p10'];
+const completed = new Set();
+
+function buildProgressGrid(){
+  const grid = document.getElementById('progressGrid');
+  grid.innerHTML = '';
+  sections.forEach(s=>{
+    const c = document.createElement('div');
+    c.className = 'progress-cell';
+    c.id = 'pg-'+s;
+    grid.appendChild(c);
+  });
+}
+buildProgressGrid();
+
+function updateProgress(){
+  const n = completed.size;
+  document.getElementById('shapeText').textContent = '('+n+', '+sections.length+')';
+  sections.forEach(s=>{
+    const cell = document.getElementById('pg-'+s);
+    if(cell) cell.classList.toggle('done', completed.has(s));
+    const link = document.querySelector('.navlink[href="#'+s+'"]');
+    if(link) link.classList.toggle('complete', completed.has(s));
+  });
+}
+
+function toggleComplete(btn){
+  const key = btn.dataset.section;
+  if(completed.has(key)){ completed.delete(key); btn.classList.remove('done'); btn.querySelector('.box').textContent=''; }
+  else{ completed.add(key); btn.classList.add('done'); btn.querySelector('.box').textContent='✓'; }
+  updateProgress();
+}
+updateProgress();
+
+/* ============ Nav active state on scroll ============ */
+const navLinks = document.querySelectorAll('.navlink');
+const observer = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      navLinks.forEach(l=>l.classList.remove('active'));
+      const link = document.querySelector('.navlink[href="#'+e.target.id+'"]');
+      if(link) link.classList.add('active');
+      document.getElementById('topbarTitle').textContent = 'numpy · ' + (link ? link.textContent.trim().replace(/[✓\[\]0-9]/g,'').trim() : '');
+    }
+  });
+}, {rootMargin:'-30% 0px -60% 0px'});
+[...sections].forEach(id=>{
+  const el = document.getElementById(id);
+  if(el) observer.observe(el);
+});
+
+/* close mobile sidebar after nav click */
+navLinks.forEach(l=>l.addEventListener('click', ()=>{
+  document.getElementById('sidebar').classList.remove('open');
+}));
+
+/* ============ Search filter ============ */
+function filterNav(){
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  navLinks.forEach(l=>{
+    const match = l.dataset.key.includes(q) || l.textContent.toLowerCase().includes(q);
+    l.parentElement.style.display = match ? '' : 'none';
+  });
+}
+
+/* ============ Dark mode ============ */
+function toggleDark(){
+  document.body.classList.toggle('dark');
+  document.getElementById('darkBtn').textContent = document.body.classList.contains('dark') ? '☀ Light mode' : '◐ Dark mode';
+}
+
+/* ============ Run code / reveal output ============ */
+function runCode(btn,id){
+  const panel = document.getElementById(id);
+  panel.classList.toggle('open');
+  btn.classList.toggle('shown');
+  btn.textContent = btn.classList.contains('shown') ? ' Hide output' : ' Run';
+}
+
+/* ============ Quiz ============ */
+function answerQuiz(btn,isCorrect,qid){
+  const opts = btn.parentElement.querySelectorAll('.quiz-opt');
+  opts.forEach(o=>o.disabled=true);
+  btn.classList.add(isCorrect?'correct':'wrong');
+  const fb = document.getElementById('fb-'+qid);
+  fb.classList.add('show', isCorrect?'ok':'no');
+  fb.textContent = isCorrect ? 'Correct — nicely reasoned.' : 'Not quite — the highlighted option above is correct.';
+  if(!isCorrect){
+    opts.forEach(o=>{ if(o.onclick.toString().includes('true')) o.classList.add('correct'); });
+  }
+}
+
+/* ============ Hero array animation ============ */
+(function(){
+  const hero = document.getElementById('heroArray');
+  const vals = [3,1,4,1,5,9,2,6];
+  vals.forEach((v,i)=>{
+    const cell = document.createElement('div');
+    cell.className='hero-cell';
+    cell.textContent=v;
+    hero.appendChild(cell);
+  });
+  let i=0;
+  setInterval(()=>{
+    const cells = hero.querySelectorAll('.hero-cell');
+    cells.forEach(c=>c.classList.remove('lit'));
+    cells[i % cells.length].classList.add('lit');
+    i++;
+  },700);
+})();
+
+/* ============ generic cell builder ============ */
+function makeCell(value, opts={}){
+  const wrap = document.createElement('div');
+  wrap.className='viz-cellwrap';
+  const cell = document.createElement('div');
+  cell.className='viz-cell'+(opts.cls?(' '+opts.cls):'');
+  cell.textContent = value;
+  wrap.appendChild(cell);
+  if(opts.idx !== undefined){
+    const idx = document.createElement('div');
+    idx.className='viz-idx';
+    idx.textContent = opts.idx;
+    wrap.appendChild(idx);
+  }
+  return wrap;
+}
+
+/* ============ List -> grid viz (section 1) ============ */
+(function(){
+  const el = document.getElementById('listToGridViz');
+  const data = [[1,2,3],[4,5,6],[7,8,9]];
+  data.forEach(row=>{
+    const rdiv = document.createElement('div');
+    rdiv.className='viz-row';
+    row.forEach(v=> rdiv.appendChild(makeCell(v)) );
+    el.appendChild(rdiv);
+  });
+})();
+
+/* ============ arange vs linspace viz ============ */
+function setAL(mode, btn){
+  document.querySelectorAll('#s1 .chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  const el = document.getElementById('alViz');
+  el.innerHTML='';
+  let vals, title, note;
+  if(mode==='arange'){
+    vals=[0,2,4,6,8];
+    title='arange(0, 10, 2)';
+    note='arange counts by a fixed step — you set how far apart each value is.';
+  } else {
+    vals=[0,0.25,0.5,0.75,1];
+    title='linspace(0, 1, 5)';
+    note='linspace fixes the number of values (5) and spaces them evenly across the range.';
+  }
+  vals.forEach(v=> el.appendChild(makeCell(v)) );
+  document.getElementById('alTitle').textContent=title;
+  document.getElementById('alNote').textContent=note;
+}
+setAL('arange', document.querySelector('#s1 .chip'));
+
+/* ============ Attributes viz (section 2) ============ */
+(function(){
+  const el = document.getElementById('attrViz');
+  const data=[[1,2,3],[4,5,6]];
+  data.forEach((row,r)=>{
+    const rdiv=document.createElement('div');
+    rdiv.className='viz-row';
+    row.forEach((v,c)=>{
+      const w = makeCell(v,{idx:'r'+r+',c'+c});
+      w.querySelector('.viz-cell').onclick=()=>{
+        document.getElementById('attrNote').textContent = 'row '+r+', col '+c+' → value '+v+' · shape (2,3) · ndim 2 · size 6';
+      };
+      w.querySelector('.viz-cell').style.cursor='pointer';
+      rdiv.appendChild(w);
+    });
+    el.appendChild(rdiv);
+  });
+})();
+
+/* ============ 1D indexing viz (section 3) ============ */
+(function(){
+  const vals=[10,20,30,40,50];
+  const viz = document.getElementById('idx1dViz');
+  const btns = document.getElementById('idx1dBtns');
+  function render(sel){
+    viz.innerHTML='';
+    vals.forEach((v,i)=> viz.appendChild(makeCell(v,{idx:i, cls: i===sel?'hi-a':''})) );
+  }
+  render(0);
+  [0,1,2,3,4,-1].forEach(i=>{
+    const b=document.createElement('button');
+    b.className='chip';
+    b.textContent='arr['+i+']';
+    b.onclick=()=>{
+      document.querySelectorAll('#idx1dBtns .chip').forEach(c=>c.classList.remove('active'));
+      b.classList.add('active');
+      const real = i<0 ? vals.length+i : i;
+      render(real);
+      document.getElementById('idx1dNote').textContent = 'arr['+i+'] → '+vals[real];
+    };
+    btns.appendChild(b);
+  });
+})();
+
+/* ============ 2D indexing viz (section 3) ============ */
+function updateIdx2d(){
+  const data=[[1,2,3],[4,5,6],[7,8,9]];
+  const r = parseInt(document.getElementById('rowSlider').value);
+  const c = parseInt(document.getElementById('colSlider').value);
+  const el = document.getElementById('idx2dViz');
+  el.innerHTML='';
+  data.forEach((row,ri)=>{
+    const rdiv=document.createElement('div');
+    rdiv.className='viz-row';
+    row.forEach((v,ci)=>{
+      let cls='';
+      if(ri===r && ci===c) cls='hi-a';
+      else if(ri===r) cls='hi-b';
+      rdiv.appendChild(makeCell(v,{cls}));
+    });
+    el.appendChild(rdiv);
+  });
+  document.getElementById('idx2dNote').textContent = 'arr['+r+'] → row '+JSON.stringify(data[r])+'  ·  arr['+r+', '+c+'] → '+data[r][c];
+}
+updateIdx2d();
+
+/* ============ Slicing viz (section 4) ============ */
+function updateSlice(){
+  const vals=[0,1,2,3,4,5,6,7,8,9];
+  let start=parseInt(document.getElementById('sliceStart').value);
+  let stop=parseInt(document.getElementById('sliceStop').value);
+  const el = document.getElementById('sliceViz');
+  el.innerHTML='';
+  vals.forEach((v,i)=> el.appendChild(makeCell(v,{idx:i, cls:(i>=start && i<stop)?'hi-a':'hi-dim'})) );
+  document.getElementById('sliceLabel').textContent = 'arr['+start+':'+stop+']';
+}
+updateSlice();
+
+/* ============ Boolean mask viz (section 4) ============ */
+function updateMask(){
+  const vals=[5,10,15,20,25];
+  const t=parseInt(document.getElementById('maskThresh').value);
+  const el=document.getElementById('maskViz');
+  el.innerHTML='';
+  vals.forEach(v=> el.appendChild(makeCell(v,{cls: v>t?'hi-a':'hi-dim'})) );
+  document.getElementById('maskLabel').textContent='arr > '+t;
+}
+updateMask();
+
+/* ============ Fancy indexing viz (section 5) ============ */
+(function(){
+  const vals=[10,20,30,40,50,60];
+  const picked = new Set([0,2,4]);
+  const el = document.getElementById('fancyViz');
+  function render(){
+    el.innerHTML='';
+    vals.forEach((v,i)=>{
+      const w = makeCell(v,{idx:i, cls: picked.has(i)?'hi-a':''});
+      w.querySelector('.viz-cell').style.cursor='pointer';
+      w.querySelector('.viz-cell').onclick=()=>{
+        if(picked.has(i)) picked.delete(i); else picked.add(i);
+        render();
+      };
+      el.appendChild(w);
+    });
+    const list = [...picked].sort((a,b)=>a-b);
+    document.getElementById('fancyNote').textContent = 'arr[['+list.join(', ')+']] → ['+list.map(i=>vals[i]).join(' ')+']';
+  }
+  render();
+})();
+
+/* ============ Reshape viz (section 6) ============ */
+function setReshape(rows,cols,btn){
+  document.querySelectorAll('#s6 .chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  const el = document.getElementById('reshapeViz');
+  el.innerHTML='';
+  const flat = Array.from({length:12},(_,i)=>i);
+  for(let r=0;r<rows;r++){
+    const rdiv=document.createElement('div');
+    rdiv.className='viz-row';
+    for(let c=0;c<cols;c++){
+      rdiv.appendChild(makeCell(flat[r*cols+c]));
+    }
+    el.appendChild(rdiv);
+  }
+}
+setReshape(1,12, document.querySelector('#s6 .chip'));
+
+/* ============ Sort viz (section 7) ============ */
+(function(){
+  const vals=[42,5,18,23];
+  const idx = vals.map((v,i)=>i).sort((a,b)=>vals[a]-vals[b]);
+  const el = document.getElementById('sortViz');
+  const row1=document.createElement('div'); row1.className='viz-row';
+  idx.forEach(i=> row1.appendChild(makeCell(vals[i],{idx:'from '+i})) );
+  el.appendChild(row1);
+})();
+
+/* ============ Broadcast viz (section 9) ============ */
+(function(){
+  const A=[[1,2,3],[4,5,6]];
+  const B=[10,20,30];
+  const el = document.getElementById('broadcastViz');
+  const brow=document.createElement('div'); brow.className='viz-row';
+  B.forEach(v=> brow.appendChild(makeCell(v,{cls:'hi-b'})) );
+  el.appendChild(brow);
+  el.appendChild(Object.assign(document.createElement('div'),{style:'height:6px'}));
+  A.forEach(row=>{
+    const rdiv=document.createElement('div'); rdiv.className='viz-row';
+    row.forEach((v,c)=> rdiv.appendChild(makeCell(v+' +'+B[c])) );
+    el.appendChild(rdiv);
+  });
+})();
+
+/* ============ Stack viz (section 8) ============ */
+function setStack(mode, btn){
+  document.querySelectorAll('#s8 .chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  const A=[[1,2],[3,4]], B=[[5,6],[7,8]];
+  const el = document.getElementById('stackViz');
+  el.innerHTML='';
+  if(mode==='v'){
+    [...A,...B].forEach(row=>{
+      const rdiv=document.createElement('div'); rdiv.className='viz-row';
+      row.forEach(v=> rdiv.appendChild(makeCell(v)) );
+      el.appendChild(rdiv);
+    });
+  } else {
+    A.forEach((row,ri)=>{
+      const rdiv=document.createElement('div'); rdiv.className='viz-row';
+      row.concat(B[ri]).forEach(v=> rdiv.appendChild(makeCell(v)) );
+      el.appendChild(rdiv);
+    });
+  }
+}
+setStack('v', document.querySelector('#s8 .chip'));
+
+/* ============ Axis viz (section 10) ============ */
+function setAxis(axis, btn){
+  document.querySelectorAll('#s10 .chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  const data=[[1,2,3],[4,5,6],[7,8,9]];
+  const el = document.getElementById('axisViz');
+  el.innerHTML='';
+  data.forEach((row,ri)=>{
+    const rdiv=document.createElement('div'); rdiv.className='viz-row';
+    row.forEach((v,ci)=> rdiv.appendChild(makeCell(v,{cls:(axis===1?'hi-a':'hi-b')})) );
+    el.appendChild(rdiv);
+  });
+  if(axis===1){
+    const sums=data.map(r=>r.reduce((a,b)=>a+b,0));
+    document.getElementById('axisNote').textContent = 'axis=1 collapses each row → sums: ['+sums.join(' ')+']';
+  } else {
+    const sums=[0,1,2].map(c=>data[0][c]+data[1][c]+data[2][c]);
+    document.getElementById('axisNote').textContent = 'axis=0 collapses each column → sums: ['+sums.join(' ')+']';
+  }
+}
+setAxis(1, document.querySelector('#s10 .chip'));
+</script>
+</body>
+</html>
